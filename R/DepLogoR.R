@@ -324,7 +324,7 @@ addLegend<-function(minp,maxp,minp.col,maxp.col,axis.at.bottom=TRUE,pvals=FALSE)
 	on.exit(par(bak));
 
 	vals<-seq(minp,maxp,length=20)
-	step<-(maxp-minp)/21
+	step<-(maxp-minp)/19
 	cols<-rgb(t(sapply(seq(0,1,length=20),function(a){a*(maxp.col-minp.col) + minp.col})),maxColorValue = 255)
 	
 	pmar=par("mar")
@@ -1183,11 +1183,11 @@ filter.by.conservation<-function(relative.ic){
 #' fun<-filter.by.dependencies(mi.threshold = 0.3)
 filter.by.dependencies<-function(mi.threshold, use.max=FALSE){
 	function(data){
-		deps<-getDeps(data)/nrow(data$data)/log(length(data$alphabet))/(ncol(data$data)-1)
+		deps<-getDeps(data)/nrow(data$data)/log(length(data$alphabet))
 		if(use.max){
 			deps<-apply(deps,1,max,na.rm=TRUE)	
 		}else{
-			deps<-rowSums(deps)
+			deps<-rowSums(deps)/(ncol(data$data)-1)
 		}
 		sel<-deps>=mi.threshold
 		list(selected=sel,range=range(deps,na.rm=TRUE))
