@@ -110,29 +110,21 @@ partition.DLData<-function(data,minElements=10,threshold=0.1,numBestForSorting=3
 # data: data.frame with last column = weights
 partitionRecursive<-function(data,minElements=10,threshold=0.1,numBestForSorting=3,maxNum=6,sortByWeights=FALSE,alphabet=c("A","C","G","T"),exclude=rep(FALSE,ncol(data))){
 	sortTemp<-data
-	if(maxNum <= 0 | nrow(sortTemp) < minElements | sum(!exclude)<2){# TODO: maxNum == 0
+	if(maxNum <= 0 | nrow(sortTemp) < minElements | sum(!exclude)<2){
 		return( list(sortTemp) )
 	}else{
-		
-		# list(deps,mis)
-
 		pair<-getInformation(data = sortTemp,numBestForSorting = numBestForSorting,exclude = exclude,alphabet=alphabet)
 		inf<-pair$deps;
 		deps<-pair$mis
 		best<-which.max(inf)
 
-		
 		if( inf[best]/nrow(sortTemp)/numBestForSorting < threshold){
-			#sortTemp<-sortTemp[order(sortTemp[,best]),]
 			return( list(sortTemp) )
 		}else{
-
-			
 			exclude[best]<-TRUE;
 			
 			partSort<-partition.2(sortTemp = sortTemp,curr = best,minElements = minElements,sortByWeights = sortByWeights)
 			
-
 			kls<-deps[best,]/nrow(sortTemp)
 			o2<-order(kls,decreasing = T)
 			secpos<-o2[ !exclude[o2] & kls[o2]>threshold ]
@@ -144,8 +136,6 @@ partitionRecursive<-function(data,minElements=10,threshold=0.1,numBestForSorting
 				for(i in 1:length(partSort)){
 					temp2<-partition.2(sortTemp = partSort[[i]],curr = secpos,minElements = minElements,sortByWeights = sortByWeights)
 					temp2<-joinSmall(partSort = temp2,minElements = minElements,sortByWeights = sortByWeights)
-					#temp2<-lapply(temp2,function(el){ el[order(el[,secpos]),] })
-				
 					li<-c(li,temp2)
 				}
 				exclude[secpos]<-TRUE
@@ -165,9 +155,7 @@ partitionRecursive<-function(data,minElements=10,threshold=0.1,numBestForSorting
 
 			return( partitions )
 		}
-
 	}
-	
 }
 
 joinSmall<-function(partSort,minElements,sortByWeights){
@@ -266,7 +254,6 @@ getDeps.data.frame<-function(data,alphabet,...){
 	x<-data.frame(lapply(x,factor,levels=alphabet))
 	sum<-log( nrow(x) )
 	
-	
 	mis<-sapply(1:ncol(x),function(i){
 		sapply(1:ncol(x),function(j){
 			tab<-table( x[,c(i,j)] )
@@ -291,7 +278,7 @@ getDeps.data.frame<-function(data,alphabet,...){
 
 getInformation<-function(data,numBestForSorting,exclude,alphabet){
 	mis<-getDeps(data = data,alphabet = alphabet)
-
+	
 	mis2<-mis[!exclude,]
 	vals2<-apply(mis2,1,function(a){
 		so<-sort(x = a,decreasing = T);
@@ -303,7 +290,6 @@ getInformation<-function(data,numBestForSorting,exclude,alphabet){
 }
 
 partition.2<-function(sortTemp,curr,minElements,sortByWeights){
-	
 	if(nrow(sortTemp)<minElements){
 		return(list(sortTemp))
 	}else{
@@ -414,8 +400,8 @@ plotDepmatrix<-function(data, axis.at.bottom=TRUE,add.legend=TRUE, show.pvals=FA
 		minp<-min(mis[upper.tri(mis)], na.rm = TRUE)
 		maxp<-max(mis[upper.tri(mis)], na.rm = TRUE)
 		if(maxp==minp){
-			minp = max(0,minp-0.5)
-			maxp = maxp+0.5
+			minp <- max(0,minp-0.5)
+			maxp <- maxp+0.5
 		}
 	}else{
 		mis<-log(getDeps(data) / nrow(data$data))
@@ -437,7 +423,6 @@ plotDepmatrix<-function(data, axis.at.bottom=TRUE,add.legend=TRUE, show.pvals=FA
 		axis(side = 3,tcl=.5,line = 2,at=1:ncol(mis),labels=NA)
 		axis(side = 3,col=0,line=-.3*max(nchar(as.character(axis.labels)))/2,at=1:ncol(mis),labels=axis.labels)
 	}
-	
 	
 	minp.col<-t(col2rgb("white"))
 	maxp.col<-t(col2rgb("black"))
@@ -509,8 +494,8 @@ plotDeparcs<-function(data, axis.at.bottom=TRUE,add.legend=TRUE, show.pvals=FALS
 		minp<-min(mis[upper.tri(mis)], na.rm = TRUE)
 		maxp<-max(mis[upper.tri(mis)], na.rm = TRUE)
 		if(maxp==minp){
-			minp = max(0,minp-0.5)
-			maxp = maxp+0.5
+			minp <- max(0,minp-0.5)
+			maxp <- maxp+0.5
 		}
 	}else{
 		mis<-log(getDeps(data) / nrow(data$data))
@@ -654,48 +639,42 @@ deprects<-function(part, yoff, ic.scale=TRUE){
 #' logo(data,yoff=nrow(data$data))
 #' axis(1)
 logo<-function(part, yoff, ic.scale=TRUE){
-	
 	pwm<-getPWM(part)
 	size<-nrow(part$data)
 	alphabet<-part$alphabet
 	
 	letters = list(x = NULL, y = NULL, id = NULL, fill = NULL)
 	npos = ncol(pwm)
-	wt = 1
-	x.pos = 0.5
-	eps = 0
-	heights = c()
-	ymins = c()
-	ymaxs = c()
+	wt <- 1
+	x.pos <- 0.5
+	eps <- 0
+	heights <- c()
+	ymins <- c()
+	ymaxs <- c()
 	for (j in 1:npos) {
-		column = pwm[, j]
-		sh = ifelse(ic.scale,getICScale(column)^2,1)
-		hts = column * sh*size
-		letterOrder = order(abs(hts))
-		ypos.pos = yoff-size
-		
+		column <- pwm[, j]
+		sh <- ifelse(ic.scale,getICScale(column)^2,1)
+		hts <- column * sh*size
+		letterOrder <- order(abs(hts))
+		ypos.pos <- yoff-size
 		
 		hts<-hts[letterOrder]
 		chars<-alphabet$chars[letterOrder]
 		cols<-alphabet$cols[letterOrder]
 		
 		for (i in 1:alphabet$size) {
-			ht = hts[i]
-			y.pos = ypos.pos
-			ht = ht - eps
-			ypos.pos = ypos.pos + ht + eps
-			char = chars[i]
-			col = cols[i]
-			#letters = addLetter(letters, lepol, 
-			#					x.pos, y.pos, ht, wt * 0.99, col = col)
+			ht <- hts[i]
+			y.pos <- ypos.pos
+			ht <- ht - eps
+			ypos.pos <- ypos.pos + ht + eps
+			char <- chars[i]
+			col <- cols[i]
 			let<-getLetter(letterPolygons[[char]],x.pos,y.pos,ht,wt*0.99,col=col)
 			polygon(let,col=let$col,border=NA)
 		}
 		
-		
-		x.pos = x.pos + wt
+		x.pos <- x.pos + wt
 	}
-#	polygon(letters, col = letters$col, border = NA)
 	yoff-size
 }
 
@@ -726,7 +705,7 @@ logo<-function(part, yoff, ic.scale=TRUE){
 #' plotBlocks(data)
 #' 
 #' # partition data
-#' partitions=partition(data,threshold=0.3)
+#' partitions <- partition(data,threshold=0.3)
 #' # and plot partitions
 #' plotBlocks(partitions)
 #' 
@@ -875,7 +854,6 @@ plotDeplogo.DLData<-function(data, dep.fun=plotDeparcs, block.fun=deprects, summ
 		li
 	})
 	
-	
 	total.height<-sum(chunk.height)+summary.height*(length(chunks)-1)+summary.height*3.5
 	numPlots<-length(chunks)*2+1+1
 	height<-c(summary.height*3,as.vector(rbind(chunk.height,rep(summary.height,length(chunk.height)))),summary.height)/total.height
@@ -890,23 +868,15 @@ plotDeplogo.DLData<-function(data, dep.fun=plotDeparcs, block.fun=deprects, summ
 		layout( mat = matrix(1:numPlots,ncol=1),widths = c(1),heights=height )
 	}
 	
-	
 	dep.fun(data = data,add.legend=dep.fun.legend,show.pvals=show.dependency.pvals,axis.labels=axis.labels,threshold=threshold);
 	par(mar=c(0,2.5,0,ifelse(!is.null(weight.fun),0,1)))
 
-	
 	w.li<-list();
 	sapply(1:length(parts),function(i){
-		
-
 		sub.parts<-partition.DLData(data = parts[[i]],minElements = nrow(parts[[i]]$data)*minPercent,
 							 threshold = threshold,numBestForSorting = numBestForSorting, maxNum = maxNum);
-	
-		#deprects(parts = sub.parts)
-		#print(sub.parts)
+
 		plotBlocks(data = sub.parts,show.number = TRUE, block.fun = block.fun,ic.scale = TRUE, add = FALSE,...)
-	
-		#pwm<-getPWM(part = parts[[i]])
 		plotBlocks(data = parts[[i]],show.number = FALSE, block.fun = summary.fun,ic.scale = TRUE,add = FALSE,... )
 	
 		for(j in 1:length(sub.parts)){
@@ -922,7 +892,6 @@ plotDeplogo.DLData<-function(data, dep.fun=plotDeparcs, block.fun=deprects, summ
 	axis(side = 1,at=1:(ncol(data$data)-1),labels=axis.labels,cex=par("cex"),pos=1)
 	
 	if(!is.null(weight.fun)){
-		
 		par(mar=c(0,.5,0,1))
 		plot.new()
 		range<-range(data$data$weights)
@@ -1226,7 +1195,6 @@ filterColumns<-function(data,filter.fun){
 }
 
 filterColumns.DLData<-function(data,filter.fun){
-	
 	ax.lab<-data$axis.labels
 	if(is.null(ax.lab)){
 		ax.lab<-1:(ncol(data$data)-1)
@@ -1289,21 +1257,13 @@ suggestColors.DLData<-function(data){
 	d<-matrix(rank(d),ncol=ncol(d))
 	rownames(d)<-colnames(d)<-syms
 	diag(d)<-0
-#	scale<-cmdscale(d,k=2,add=TRUE)$points[,1:2]
-#	names(scale)<-syms
-	
-#	scale[,1]<- (scale[,1]-min(scale[,1]))/(max(scale[,1])-min(scale[,1]))*200-100
-#	scale[,2]<- (scale[,2]-min(scale[,2]))/(max(scale[,2])-min(scale[,2]))*200-100
-#	colors<-LAB(L=50,A=scale[,1],B=scale[,2])
-#	rgbs<-coords(as(colors,"RGB"))
-#	rgbs<-apply(rgbs,2,function(a){(a-min(a))/(max(a)-min(a))})
-#	colors<-rgb(red = rgbs[,1],green = rgbs[,2],blue = rgbs[,3])
+
 	scale<-cmdscale(d,k=1,add=TRUE)$points[,1]
 	names(scale)<-syms
 	ran<-rank(scale,ties.method = "min")
 	colors<-rainbow(max(ran))[ran]
 	if("-"%in%syms){
-		colors[syms=="-"]<-"grey"
+		colors[syms=="-"]<-"black"
 	}
 	colors
 }

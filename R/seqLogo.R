@@ -14,12 +14,12 @@ alphabet.protein.gap<-list(alphabet=c("I", "L", "V", "F", "M", "C", "A", "G", "P
 # appends the letter which to the object letters
 addLetter = function (letters, letterPolygon, x.pos, y.pos, ht, wt, col="black") 
 {
-	x = x.pos + wt * letterPolygon$x
-	y = y.pos + ht * letterPolygon$y
-	polygons = sum(is.na(x))+1  # a letter can consist of more then one polygon
-	letters$x = c(letters$x, NA, x)
-	letters$y = c(letters$y, NA, y)
-	letters$col = c(letters$col, rep(col,polygons))
+	x <- x.pos + wt * letterPolygon$x
+	y < y.pos + ht * letterPolygon$y
+	polygons <- sum(is.na(x))+1  # a letter can consist of more then one polygon
+	letters$x <- c(letters$x, NA, x)
+	letters$y <- c(letters$y, NA, y)
+	letters$col <- c(letters$col, rep(col,polygons))
 	letters
 }
 
@@ -27,10 +27,9 @@ addLetter = function (letters, letterPolygon, x.pos, y.pos, ht, wt, col="black")
 # appends the letter which to the object letters
 getLetter = function (letterPolygon, x.pos, y.pos, ht, wt, col="black") 
 {
-	letters = 
-	x = x.pos + wt * letterPolygon$x
-	y = y.pos + ht * letterPolygon$y
-	polygons = sum(is.na(x))+1  # a letter can consist of more then one polygon
+	x <- x.pos + wt * letterPolygon$x
+	y <- y.pos + ht * letterPolygon$y
+	polygons <- sum(is.na(x))+1  # a letter can consist of more then one polygon
 
 	list(x = x, y = y, id = NULL, fill = NULL, col=rep(col,polygons))
 }
@@ -42,8 +41,8 @@ Letter = function(x,y) {
 	if(length(x) != length(y)) {
 		stop("The length of vector x is different from length of vector y")
 	}
-	pts = list(x=x,y=y);
-	class(pts) = "Letter";
+	pts <- list(x=x,y=y);
+	class(pts) <- "Letter";
 	return(pts);
 }
 
@@ -59,14 +58,14 @@ Letter = function(x,y) {
 ##' @examples
 ##' DNA = Alphabet(c("A","C","G","T"),c("green4","blue","orange","red"))
 Alphabet = function(chars,cols) {
-	obj = list(chars=chars,cols=cols,size=length(chars))
-	class(obj)="Alphabet"
+	obj <- list(chars=chars,cols=cols,size=length(chars))
+	class(obj)<-"Alphabet"
 	return(obj);
 }
 
 #################### Letter Polygons must be created
-letterPolygons=list();
-class(letterPolygons)="LetterPolygons";
+letterPolygons<-list();
+class(letterPolygons)<-"LetterPolygons";
 ############## A
 letterPolygons$A = Letter(
 	c(0,  4,  6, 10,  8,  5, 2, 0, NA,2.2,2.6,7.4,7.8,2.2) * 0.1,
