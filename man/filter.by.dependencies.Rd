@@ -22,7 +22,7 @@ to all other columns. Mutual information is normalized to to interval
 [0,1], where 0 corresponds to independence and 1 to perfect dependence.
 }
 \examples{
-fun<-filter.by.dependencies(mi.threshold = 0.3)
+fun <- filter.by.dependencies(mi.threshold = 0.3)
 }
 \author{
 Jan Grau <grau@informatik.uni-halle.de>

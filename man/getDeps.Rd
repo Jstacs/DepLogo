@@ -27,8 +27,8 @@ significance of mutual information values, as for large N, 2*N*I(X_i,X_j) is
 approximately chi squared.
 }
 \examples{
-data<-DLData(c("ACGT","ATTA"))
-deps<-getDeps(data)
+data <- DLData(c("ACGT", "ATTA"))
+deps <- getDeps(data)
 
 
 }

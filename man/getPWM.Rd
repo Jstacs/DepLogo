@@ -18,7 +18,7 @@ Determines the position weight matrix from a DLData object as relative frequency
 in each column of the data slot.
 }
 \examples{
-data<-DLData(c("ACGT","ATTA"))
+data <- DLData(c("ACGT", "ATTA"))
 getPWM(data)
 }
 \author{

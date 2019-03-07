@@ -18,7 +18,7 @@ the Alphabet object
 builts an object of class Alphabet from the given set of symbols and colors
 }
 \examples{
-DNA = Alphabet(c("A","C","G","T"),c("green4","blue","orange","red"))
+DNA <- Alphabet(c("A", "C", "G", "T"), c("green4", "blue", "orange", "red"))
 }
 \author{
 Martin Nettling

@@ -1,49 +1,49 @@
 #' DNA alphabet
-alphabet.dna<-list(alphabet=c("A","C","G","T"),colors=c("green","blue","orange","red"))
+alphabet.dna <- list(alphabet=c("A", "C", "G", "T"), colors = c("green", "blue", "orange", "red"))
 #' DNA alphabet with gaps
-alphabet.dna.gap<-list(alphabet=c("A","C","G","T","-"),colors=c("green","blue","orange","red","black"))
+alphabet.dna.gap <- list(alphabet = c("A", "C", "G", "T", "-"), colors = c("green", "blue", "orange", "red", "black"))
 #' RNA alphabet
-alphabet.rna<-list(alphabet=c("A","C","G","U"),colors=c("green","blue","orange","red"))
+alphabet.rna <- list(alphabet = c("A", "C", "G", "U"), colors = c("green", "blue", "orange", "red"))
 #' RNA alphabet with gaps
-alphabet.rna.gap<-list(alphabet=c("A","C","G","U","-"),colors=c("green","blue","orange","red","black"))
+alphabet.rna.gap <- list(alphabet = c("A", "C", "G", "U", "-"), colors = c("green", "blue", "orange", "red", "black"))
 #' Amino acid alphabet
-alphabet.protein<-list(alphabet=c("I", "L", "V", "F", "M", "C", "A", "G", "P", "T", "S", "Y", "W", "Q", "N", "H", "E", "D", "K", "R", "B", "Z", "X"),colors=rainbow(23))
+alphabet.protein <- list(alphabet = c("I", "L", "V", "F", "M", "C", "A", "G", "P", "T", "S", "Y", "W", "Q", "N", "H", "E", "D", "K", "R", "B", "Z", "X"), colors = rainbow(23))
 #' Amino acid alphabet with gaps
-alphabet.protein.gap<-list(alphabet=c("I", "L", "V", "F", "M", "C", "A", "G", "P", "T", "S", "Y", "W", "Q", "N", "H", "E", "D", "K", "R", "B", "Z", "X","-"),colors=rainbow(24))
+alphabet.protein.gap <- list(alphabet = c("I", "L", "V", "F", "M", "C", "A", "G", "P", "T", "S", "Y", "W", "Q", "N", "H", "E", "D", "K", "R", "B", "Z", "X","-"), colors = rainbow(24))
 
 # appends the letter which to the object letters
-addLetter = function (letters, letterPolygon, x.pos, y.pos, ht, wt, col="black") 
+addLetter <- function (letters, letterPolygon, x.pos, y.pos, ht, wt, col = "black") 
 {
 	x <- x.pos + wt * letterPolygon$x
 	y < y.pos + ht * letterPolygon$y
-	polygons <- sum(is.na(x))+1  # a letter can consist of more then one polygon
+	polygons <- sum(is.na(x)) + 1  # a letter can consist of more then one polygon
 	letters$x <- c(letters$x, NA, x)
 	letters$y <- c(letters$y, NA, y)
-	letters$col <- c(letters$col, rep(col,polygons))
+	letters$col <- c(letters$col, rep(col, polygons))
 	letters
 }
 
 
 # appends the letter which to the object letters
-getLetter = function (letterPolygon, x.pos, y.pos, ht, wt, col="black") 
+getLetter <- function (letterPolygon, x.pos, y.pos, ht, wt, col = "black") 
 {
 	x <- x.pos + wt * letterPolygon$x
 	y <- y.pos + ht * letterPolygon$y
-	polygons <- sum(is.na(x))+1  # a letter can consist of more then one polygon
+	polygons <- sum(is.na(x)) + 1  # a letter can consist of more then one polygon
 
-	list(x = x, y = y, id = NULL, fill = NULL, col=rep(col,polygons))
+	list(x = x, y = y, id = NULL, fill = NULL, col = rep(col, polygons))
 }
 
 
 ##########
 # Class to represent letterPolygons. A Letter consists of a x and a y vector
-Letter = function(x,y) {
+Letter <- function(x, y) {
 	if(length(x) != length(y)) {
 		stop("The length of vector x is different from length of vector y")
 	}
-	pts <- list(x=x,y=y);
-	class(pts) <- "Letter";
-	return(pts);
+	pts <- list(x = x, y = y)
+	class(pts) <- "Letter"
+	return(pts)
 }
 
 ##' builts an object of class Alphabet from the given set of symbols and colors
@@ -56,16 +56,16 @@ Letter = function(x,y) {
 ##' @exportClass Alphabet
 ##' @author Martin Nettling
 ##' @examples
-##' DNA = Alphabet(c("A","C","G","T"),c("green4","blue","orange","red"))
-Alphabet = function(chars,cols) {
-	obj <- list(chars=chars,cols=cols,size=length(chars))
-	class(obj)<-"Alphabet"
-	return(obj);
+##' DNA <- Alphabet(c("A", "C", "G", "T"), c("green4", "blue", "orange", "red"))
+Alphabet <- function(chars, cols) {
+	obj <- list(chars = chars, cols = cols, size = length(chars))
+	class(obj) <- "Alphabet"
+	return(obj)
 }
 
 #################### Letter Polygons must be created
-letterPolygons<-list();
-class(letterPolygons)<-"LetterPolygons";
+letterPolygons <- list()
+class(letterPolygons) <- "LetterPolygons"
 ############## A
 letterPolygons$A = Letter(
 	c(0,  4,  6, 10,  8,  5, 2, 0, NA,2.2,2.6,7.4,7.8,2.2) * 0.1,

@@ -21,7 +21,7 @@ where 0 corresponds to uniform distribution and 1 to perfect conservation
 of one nucleotide or amino acid, respectively.
 }
 \examples{
-fun<-filter.by.conservation(relative.ic = 0.9)
+fun <- filter.by.conservation(relative.ic = 0.9)
 }
 \author{
 Jan Grau <grau@informatik.uni-halle.de>

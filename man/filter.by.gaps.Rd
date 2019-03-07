@@ -17,7 +17,7 @@ function that, given a \link{DLData} object, returns \code{TRUE}
 Filter columns (sequence positions) by gaps
 }
 \examples{
-fun<-filter.by.gaps(percent.gap=0.1)
+fun <- filter.by.gaps(percent.gap = 0.1)
 }
 \author{
 Jan Grau <grau@informatik.uni-halle.de>

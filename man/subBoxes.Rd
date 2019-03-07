@@ -22,11 +22,12 @@ Each entry of the list is shown as an independent boxplot.
 }
 \examples{
 # read data and create DLData object
-seqs<-read.table(system.file("extdata", "nrsf.txt", package = "DepLogo"),stringsAsFactors = FALSE)
-data<-DLData(sequences = seqs[,1],weights = log(seqs[,2]+1) )
+seqs <- read.table(system.file("extdata", "nrsf.txt", package = "DepLogo"), 
+    stringsAsFactors = FALSE)
+data <- DLData(sequences = seqs[, 1], weights = log1p(seqs[, 2]) )
 
 # create dependency logo with plotted weights
-plotDeplogo(data,threshold=0.03,weight.fun=subBoxes)
+plotDeplogo(data, threshold = 0.03, weight.fun = subBoxes)
 }
 \author{
 Jan Grau <grau@informatik.uni-halle.de>

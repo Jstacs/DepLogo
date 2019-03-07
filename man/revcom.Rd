@@ -16,7 +16,7 @@ the reverse complement
 Determine the reverse complementary \code{DLData} object. Only works for DNA or RNA. Data may include gap symbols.
 }
 \examples{
-data<-DLData(c("ACGT","ATTA"))
+data <- DLData(c("ACGT", "ATTA"))
 revcom(data)
 }
 \author{

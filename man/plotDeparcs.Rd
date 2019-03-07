@@ -30,14 +30,15 @@ the \code{data} object.
 }
 \examples{
 # create DLData object
-seqs<-read.table(system.file("extdata", "cjun.txt", package = "DepLogo"),stringsAsFactors = FALSE)
-data<-DLData(sequences = seqs[,1],weights = log(seqs[,2]+1) )
+seqs <- read.table(system.file("extdata", "cjun.txt", package = "DepLogo"), 
+    stringsAsFactors = FALSE)
+data <- DLData(sequences = seqs[,1], weights = log1p(seqs[, 2]) )
 
 # plot using default parameters
 plotDeparcs(data)
 
 # plot with axis at top, without a legend (color scale), and using p-values
-plotDeparcs(data, axis.at.bottom=FALSE, add.legend=FALSE, show.pvals=TRUE)
+plotDeparcs(data, axis.at.bottom = FALSE, add.legend = FALSE, show.pvals = TRUE)
 }
 \author{
 Jan Grau <grau@informatik.uni-halle.de>

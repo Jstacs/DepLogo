@@ -11,40 +11,43 @@
 #' @author Jan Grau <grau@informatik.uni-halle.de>
 #'   
 #' @examples
-#' data<-DLData(c("ACGT","ATTA"))
+#' data <- DLData(c("ACGT", "ATTA"))
 #' getPWM(data)
-getPWM<-function(part){
-	UseMethod("getPWM",part)
+getPWM <- function(part){
+	UseMethod("getPWM", part)
 }
 
-getPWM.DLData<-function(part){
-	alphabet<-part$alphabet$chars
-	part<-part$data[,-ncol(x = part$data)]
-	apply(part,2,function(a){t<-table(factor(x = a,levels=alphabet));t/sum(t)})
+getPWM.DLData <- function(part){
+	alphabet <- part$alphabet$chars
+	part <- part$data[, -ncol(x = part$data)]
+	apply(part,2,function(a){
+		t <- table(factor(x = a, levels = alphabet))
+		t/sum(t)
+	})
 }
 
-drawArc<-function(x,y,radius,col,...){
-	po <- seq(from = 0,to = pi,length=100)
-	a<-radius*cos(x = po);
-	b<-radius*sin(x = po);
-	al<- atan2(y = b, x = a)
-	rad<-sqrt(x = a^2+b^2)
-	xp<-rad*cos(x = al)+x
-	yp<-rad*sin(x = al)+y
-	lines(x = xp,y = yp,col=col,...)
+drawArc <- function(x, y, radius, col, ...){
+	po <- seq(from = 0, to = pi, length = 100)
+	a <- radius*cos(x = po)
+	b <- radius*sin(x = po)
+	al <- atan2(y = b, x = a)
+	rad <- sqrt(x = a^2 + b^2)
+	xp <- rad*cos(x = al) + x
+	yp <- rad*sin(x = al) + y
+	lines(x = xp, y = yp, col=col, ...)
 }
 
-getColor<-function(column,ic=255,colors=c("green","blue","orange","red")){
-	vals<-col2rgb(col = colors)
-	vals<-vals%*%column
-	rgb(red = vals[1],green = vals[2],blue = vals[3],alpha = ic,maxColorValue=255)
+getColor <- function(column, ic = 255, colors = c("green", "blue", "orange", "red")){
+	vals <- col2rgb(col = colors)
+	vals <- vals%*%column
+	rgb(red = vals[1], green = vals[2], blue = vals[3], alpha = ic, maxColorValue = 255)
 }
 
-getICScale<-function(column){
-	ic<-log2(x = length(x = column))
-	max<-ic;
-	column<-column[column>0];
-	ic<-ic+sum(column*log2(column))
+getICScale <- function(column){
+	ic <- log2(x = length(x = column))
+	max <- ic
+	column <- column[column>0]
+	ic <- ic + sum(column*log2(column))
 	sqrt(x = ic/max)
 }
 
@@ -78,103 +81,135 @@ getICScale<-function(column){
 #' 
 #' @examples
 #' # create DLData object
-#' seqs<-read.table(system.file("extdata", "cjun.txt", package = "DepLogo"),stringsAsFactors = FALSE)
-#' data<-DLData(sequences = seqs[,1],weights = log(seqs[,2]+1) )
+#' seqs <- read.table(system.file("extdata", "cjun.txt", package = "DepLogo"),
+#'     stringsAsFactors = FALSE)
+#' data <- DLData(sequences = seqs[, 1], weights = log1p(seqs[,2]) )
 #' 
 #' # partition data using default parameters
-#' partitions<-partition(data)
+#' partitions <- partition(data)
 #' 
 #' # partition data using a threshold of 0.3 on the mutual 
 #' # information value to the most dependent position, 
 #' # sorting the resulting partitions by weight
-#' partitions2<-partition(data = data, threshold=0.3, numBestForSorting=1, sortByWeights=TRUE)
-partition<-function(data,minElements=10,threshold=0.1,numBestForSorting=3,maxNum=6,sortByWeights=NULL){
-	UseMethod("partition",data)
+#' partitions2 <- partition(data = data, threshold = 0.3, numBestForSorting = 1, sortByWeights = TRUE)
+partition <- function(
+	data,
+	minElements = 10,
+	threshold = 0.1,
+	numBestForSorting = 3,
+	maxNum = 6,
+	sortByWeights = NULL){
+	UseMethod("partition", data)
 }
 
-partition.DLData<-function(data,minElements=10,threshold=0.1,numBestForSorting=3,maxNum=6,sortByWeights=NULL){
+partition.DLData<-function(
+	data,
+	minElements = 10,
+	threshold = 0.1,
+	numBestForSorting = 3,
+	maxNum = 6,
+	sortByWeights = NULL){
 	if( is.null(sortByWeights)){
-		sortByWeights<-data$sortByWeights;
+		sortByWeights <- data$sortByWeights;
 	}
 
-	temp<-partitionRecursive(data=data$data,minElements = minElements,threshold = threshold,numBestForSorting = numBestForSorting,
-					maxNum = maxNum,sortByWeights = sortByWeights, alphabet = data$alphabet$chars,exclude = rep(FALSE,ncol(data$data)-1))
+	temp <- partitionRecursive(data = data$data,
+							   minElements = minElements,
+							   threshold = threshold,
+							   numBestForSorting = numBestForSorting,
+							   maxNum = maxNum,
+							   sortByWeights = sortByWeights,
+							   alphabet = data$alphabet$chars,
+							   exclude = rep(FALSE, ncol(data$data) - 1))
 	
-	lapply(temp,function(a){
-		li<-list(data=a,alphabet=data$alphabet,sortByWeights=sortByWeights)
-		class(li)<-"DLData"
+	lapply(temp, function(a){
+		li <- list(data = a, alphabet = data$alphabet, sortByWeights = sortByWeights, axis.labels = data$axis.labels)
+		class(li) <- "DLData"
 		li
 	})
 }
 
 # data: data.frame with last column = weights
-partitionRecursive<-function(data,minElements=10,threshold=0.1,numBestForSorting=3,maxNum=6,sortByWeights=FALSE,alphabet=c("A","C","G","T"),exclude=rep(FALSE,ncol(data))){
-	sortTemp<-data
+partitionRecursive <- function(data, 
+							   minElements = 10, 
+							   threshold = 0.1,
+							   numBestForSorting = 3,
+							   maxNum = 6,
+							   sortByWeights = FALSE,
+							   alphabet = c("A","C","G","T"),
+							   exclude = rep(FALSE, ncol(data))){
+	sortTemp <- data
 	if(maxNum <= 0 | nrow(sortTemp) < minElements | sum(!exclude)<2){
 		return( list(sortTemp) )
 	}else{
-		pair<-getInformation(data = sortTemp,numBestForSorting = numBestForSorting,exclude = exclude,alphabet=alphabet)
-		inf<-pair$deps;
-		deps<-pair$mis
-		best<-which.max(inf)
+		pair <- getInformation(data = sortTemp, numBestForSorting = numBestForSorting, exclude = exclude, alphabet=alphabet)
+		inf <- pair$deps
+		deps <- pair$mis
+		best <- which.max(inf)
 
 		if( inf[best]/nrow(sortTemp)/numBestForSorting < threshold){
-			return( list(sortTemp) )
+			return(list(sortTemp))
 		}else{
-			exclude[best]<-TRUE;
+			exclude[best] <- TRUE
 			
-			partSort<-partition.2(sortTemp = sortTemp,curr = best,minElements = minElements,sortByWeights = sortByWeights)
+			partSort <- partition.2(sortTemp = sortTemp, curr = best, minElements = minElements, sortByWeights = sortByWeights)
 			
-			kls<-deps[best,]/nrow(sortTemp)
-			o2<-order(kls,decreasing = T)
-			secpos<-o2[ !exclude[o2] & kls[o2]>threshold ]
+			kls <- deps[best,]/nrow(sortTemp)
+			o2 <- order(kls, decreasing = TRUE)
+			secpos <- o2[ !exclude[o2] & kls[o2]>threshold ]
 			
 			if( length(secpos)>0 ){
-				secpos<-secpos[1];
+				secpos <- secpos[1]
 
-				li<-list();
+				li <- list();
 				for(i in 1:length(partSort)){
-					temp2<-partition.2(sortTemp = partSort[[i]],curr = secpos,minElements = minElements,sortByWeights = sortByWeights)
-					temp2<-joinSmall(partSort = temp2,minElements = minElements,sortByWeights = sortByWeights)
-					li<-c(li,temp2)
+					temp2 <- partition.2(sortTemp = partSort[[i]], curr = secpos, minElements = minElements, sortByWeights = sortByWeights)
+					temp2 <- joinSmall(partSort = temp2, minElements = minElements, sortByWeights = sortByWeights)
+					li <- c(li, temp2)
 				}
-				exclude[secpos]<-TRUE
-				maxNum<-maxNum-1;
-				partSort<-li;
+				exclude[secpos] <- TRUE
+				maxNum <- maxNum-1
+				partSort <- li
 			}
 			
-			partSort<-joinSmall(partSort = partSort,minElements = minElements,sortByWeights = FALSE)
+			partSort <- joinSmall(partSort = partSort, minElements = minElements, sortByWeights = FALSE)
 			
-			partitions<-list();
+			partitions <- list()
 			for(i in 1:length(partSort)){
 				
-				part<-partitionRecursive(data = partSort[[i]], minElements = minElements,threshold = threshold,numBestForSorting = numBestForSorting,
-								maxNum = maxNum-1,sortByWeights = sortByWeights,alphabet=alphabet,exclude=exclude);
-				partitions<-c(partitions,part)	
+				part <- partitionRecursive(data = partSort[[i]],
+										   minElements = minElements,
+										   threshold = threshold,
+										   numBestForSorting = numBestForSorting,
+										   maxNum = maxNum - 1,
+										   sortByWeights = sortByWeights,
+										   alphabet = alphabet,
+										   exclude = exclude)
+				partitions <- c(partitions, part)	
 			}
 
-			return( partitions )
+			return(partitions)
 		}
 	}
 }
 
-joinSmall<-function(partSort,minElements,sortByWeights){
+joinSmall <- function(partSort, minElements, sortByWeights){
 	if(length(partSort)==1){
 		return(partSort)
 	}else{
-		out<-rep(FALSE,length(partSort))
-		nout<-0;
-		minAbove<-Inf;
-		idx<-(-1);
+		out <- rep(FALSE, length(partSort))
+		nout <- 0
+		minAbove <- Inf
+		idx <- (-1)
 		
 		for(i in 1:length(partSort)){
 			if(nrow(partSort[[i]]) < minElements){
-				out[i]<-TRUE;
-				nout<-nout + nrow(partSort[[i]])
+				out[i] <- TRUE;
+				nout <- nout + nrow(partSort[[i]])
 			}else{
 				if( nrow(partSort[[i]]) < minAbove ){
-					minAbove = nrow(partSort[[i]]);
-					idx<-i;
+					minAbove <- nrow(partSort[[i]])
+					idx <- i
 				}
 			}
 		}
@@ -182,36 +217,36 @@ joinSmall<-function(partSort,minElements,sortByWeights){
 		if( nout == 0 & idx == -1 ){
 			return(partSort)
 		}else if( idx == -1 ){
-			minAbove=0;
+			minAbove <- 0;
 		}
 		
-		joined<-c();
+		joined <- c();
 		if(idx>-1){
-			joined<-partSort[[idx]];
+			joined <- partSort[[idx]];
 		}else{
-			idx<-which(out)[1]
+			idx <- which(out)[1]
 		}
 		
 		for(i in 1:length(partSort)){
 			if(out[i]){
-				joined<-rbind(joined,partSort[[i]])
+				joined <- rbind(joined, partSort[[i]])
 			}
 		}
 		
-		partSort[[idx]]<-joined
-		out[idx]<-F
+		partSort[[idx]] <- joined
+		out[idx] <- FALSE
 		
-		partSort<-partSort[!out]
+		partSort <- partSort[!out]
 		
 		if(sortByWeights){
-			meanw<-sapply(partSort,function(a){
-				mean(a[,ncol(a)])
+			meanw <- sapply(partSort, function(a){
+				mean(a[, ncol(a)])
 			})
-			o<-order(meanw,decreasing = T);
-			partSort<-partSort[o];
+			o <- order(meanw, decreasing = TRUE);
+			partSort <- partSort[o];
 		}
 		
-		return( partSort )
+		return(partSort)
 	}
 }
 
@@ -237,116 +272,118 @@ joinSmall<-function(partSort,minElements,sortByWeights){
 #' @author Jan Grau <grau@informatik.uni-halle.de>
 #' 
 #' @examples
-#' data<-DLData(c("ACGT","ATTA"))
-#' deps<-getDeps(data)
+#' data <- DLData(c("ACGT", "ATTA"))
+#' deps <- getDeps(data)
 #' 
 #' 
-getDeps<-function(data,...){
+getDeps <- function(data, ...){
 	UseMethod("getDeps",data)
 }
 
-getDeps.DLData<-function(data,...){
-	getDeps(data=data$data,alphabet=data$alphabet$chars)
+getDeps.DLData <- function(data, ...){
+	getDeps(data = data$data, alphabet = data$alphabet$chars)
 }
 
-getDeps.data.frame<-function(data,alphabet,...){
-	x<-data[,-ncol(data)]
-	x<-data.frame(lapply(x,factor,levels=alphabet))
+getDeps.data.frame <- function(data, alphabet, ...){
+	x <- data[, -ncol(data)]
+	x <- data.frame(lapply(x, factor, levels=alphabet))
 	sum<-log( nrow(x) )
 	
 	mis<-sapply(1:ncol(x),function(i){
 		sapply(1:ncol(x),function(j){
-			tab<-table( x[,c(i,j)] )
-			rs<-rowSums(tab);
-			cs<-colSums(tab);
+			tab <- table( x[, c(i, j)] )
+			rs <- rowSums(tab)
+			cs <- colSums(tab)
 
-			ref<-outer(X = rs,Y = cs,FUN = function(x,y){log(x)+log(y)-sum})
+			ref <- outer(X = rs, Y = cs, FUN = function(x,y){
+				log(x) + log(y) - sum
+			})
 			
-			mi<-tab*(log(tab)-ref);
-			mi<-sum(mi[tab>0])
+			mi <- tab*(log(tab) - ref);
+			mi <- sum(mi[tab>0])
 			
 			mi
 			
 		})
 	})
-	mis[mis<0]<-0
-	diag(mis)<-0;
+	mis[mis<0] <- 0
+	diag(mis) <- 0
 	mis
 }
 
 
 
-getInformation<-function(data,numBestForSorting,exclude,alphabet){
-	mis<-getDeps(data = data,alphabet = alphabet)
+getInformation <- function(data, numBestForSorting, exclude, alphabet){
+	mis <- getDeps(data = data, alphabet = alphabet)
 	
-	mis2<-mis[!exclude,]
-	vals2<-apply(mis2,1,function(a){
-		so<-sort(x = a,decreasing = T);
-		sum(so[1:numBestForSorting]);
+	mis2 <- mis[!exclude,]
+	vals2 <- apply(mis2, 1, function(a){
+		so <- sort(x = a, decreasing = TRUE)
+		sum(so[1:numBestForSorting])
 	})
-	vals<-rep(0,nrow(mis))
-	vals[!exclude]<-vals2;
-	list(deps=vals,mis=mis)
+	vals <- rep(0, nrow(mis))
+	vals[!exclude] <- vals2
+	list(deps = vals, mis = mis)
 }
 
-partition.2<-function(sortTemp,curr,minElements,sortByWeights){
+partition.2 <- function(sortTemp, curr, minElements, sortByWeights){
 	if(nrow(sortTemp)<minElements){
 		return(list(sortTemp))
 	}else{
-		parts<-split( sortTemp, sortTemp[,curr] )
-		freq<-sapply(parts,nrow)
-		ws<-sapply(parts,function(a){ sum(a[,ncol(a)]) })
+		parts <- split( sortTemp, sortTemp[, curr] )
+		freq <- sapply(parts, nrow)
+		ws <- sapply(parts, function(a){ sum(a[, ncol(a)]) })
 		if(sortByWeights){
-			freq<-ws/freq;
+			freq <- ws/freq;
 		}
-		ord<-order(freq,decreasing = T);
+		ord <- order(freq, decreasing = TRUE);
 		return(parts[ord])
 	}
 	
 }
 
-addLegend<-function(minp,maxp,minp.col,maxp.col,axis.at.bottom=TRUE,pvals=FALSE){
-	bak<-par("mar");
-	on.exit(par(bak));
+addLegend <- function(minp, maxp, minp.col, maxp.col, axis.at.bottom = TRUE, pvals = FALSE){
+	bak <- par("mar")
+	on.exit(par(bak))
 
-	vals<-seq(minp,maxp,length=20)
-	step<-(maxp-minp)/19
-	cols<-rgb(t(sapply(seq(0,1,length=20),function(a){a*(maxp.col-minp.col) + minp.col})),maxColorValue = 255)
+	vals <- seq(minp, maxp, length = 20)
+	step <- (maxp - minp)/19
+	cols <- rgb(t(sapply(seq(0, 1, length = 20), function(a){a * (maxp.col - minp.col) + minp.col})), maxColorValue = 255)
 	
-	pmar=par("mar")
-	pmar[3]<-2
-	par(new=TRUE,mar=pmar)
+	pmar <- par("mar")
+	pmar[3] <- 2
+	par(new = TRUE, mar = pmar)
 	
-	ylim<-exp(c(minp,maxp))
+	ylim <- exp(c(minp, maxp))
 	if(pvals){
-		ylim<-10^-c(minp,maxp)
+		ylim <- 10^-c(minp, maxp)
 	}
-	xlim<-c(minp,maxp+3*(maxp-minp))
+	xlim <- c(minp, maxp + 3 * (maxp - minp))
 	
 	if(pvals){
-		xlim<-xlim*-log(10)
-		vals<-vals*-log(10)
-		step<-step*-log(10)
+		xlim <- xlim*-log(10)
+		vals <- vals*-log(10)
+		step <- step*-log(10)
 	}
 	
 	if(axis.at.bottom){
-		plot(NA,ylim=ylim,xlim=xlim,xlab="",ylab="",axes=F,log="y",yaxs="i")
-		ticks<-axTicks(2)
-		axis(3,at = log(ticks),labels = ticks,las=0)
+		plot(NA, ylim = ylim, xlim = xlim, xlab = "", ylab = "", axes = FALSE, log = "y", yaxs = "i")
+		ticks <- axTicks(2)
+		axis(3, at = log(ticks), labels = ticks, las=0)
 	}else{
-		plot(NA,ylim=rev(ylim),xlim=xlim,xlab="",ylab="",axes=F,log="y",yaxs="i")
-		ticks<-axTicks(2)
-		axis(1,at = log(ticks),labels = ticks,las=0)
+		plot(NA, ylim = rev(ylim), xlim = xlim, xlab = "", ylab = "", axes = FALSE, log = "y", yaxs = "i")
+		ticks <- axTicks(2)
+		axis(1, at = log(ticks), labels = ticks, las = 0)
 	}
 	
-	ybottom<-exp(maxp - (0.1)*(maxp-minp))
-	ytop<-exp(maxp)
+	ybottom <- exp(maxp - (0.1) * (maxp - minp))
+	ytop <- exp(maxp)
 	if(pvals){
-		ybottom<-10^-(maxp - (0.1)*(maxp-minp))
-		ytop<-10^-maxp
+		ybottom <- 10^-(maxp - (0.1) * (maxp - minp))
+		ytop <- 10^-maxp
 	}
 	for(i in 1:length(vals)){
-		rect(xleft = vals[i]-step/2,xright = vals[i]+step/2,ybottom = ybottom,ytop = ytop,col=cols[i],border = cols[i])
+		rect(xleft = vals[i] - step/2, xright = vals[i] + step/2, ybottom = ybottom, ytop = ytop, col = cols[i], border = cols[i])
 	}
 	
 }
@@ -374,74 +411,80 @@ addLegend<-function(minp,maxp,minp.col,maxp.col,axis.at.bottom=TRUE,pvals=FALSE)
 #'   
 #' @examples
 #' # create DLData object
-#' seqs<-read.table(system.file("extdata", "cjun.txt", package = "DepLogo"),stringsAsFactors = FALSE)
-#' data<-DLData(sequences = seqs[,1],weights = log(seqs[,2]+1) )
+#' seqs <- read.table(system.file("extdata", "cjun.txt", package = "DepLogo"), 
+#'     stringsAsFactors = FALSE)
+#' data <- DLData(sequences = seqs[, 1], weights = log1p(seqs[, 2]) )
 #' 
 #' # plot using default parameters
 #' plotDepmatrix(data)
 #' 
 #' # plot with axis at top, without a legend (color scale), and using p-values
-#' plotDepmatrix(data, axis.at.bottom=FALSE, add.legend=FALSE, show.pvals=TRUE)
-plotDepmatrix<-function(data, axis.at.bottom=TRUE,add.legend=TRUE, show.pvals=FALSE,axis.labels=NULL,threshold=0.1){
+#' plotDepmatrix(data, axis.at.bottom = FALSE, add.legend = FALSE, show.pvals = TRUE)
+plotDepmatrix <- function(data,
+						  axis.at.bottom = TRUE,
+						  add.legend = TRUE,
+						  show.pvals = FALSE,
+						  axis.labels = NULL,
+						  threshold = 0.1){
 	if(is.null(axis.labels)){
 		axis.labels <- data$axis.labels
 	}
-	alphabet<-data$alphabet$chars
+	alphabet <- data$alphabet$chars
 	if(show.pvals){
-		stat<-getDeps(data)*2
-		mis<- (-log10(pchisq(stat,df = (length(alphabet)-1)^2,lower.tail = FALSE)) )
-		rang<-range(mis[!is.infinite(mis)],na.rm=TRUE);
+		stat <- getDeps(data) * 2
+		mis <- (-log10(pchisq(stat, df = (length(alphabet) - 1)^2, lower.tail = FALSE)) )
+		rang<-range(mis[!is.infinite(mis)], na.rm = TRUE);
 		if(rang[2] > rang[1]){
-			mis[is.infinite(mis)]<-rang[2]
+			mis[is.infinite(mis)] <- rang[2]
 		}else{
-			mis[mis>100]<- 100
+			mis[mis>100] <- 100
 		}
 
-		minp<-min(mis[upper.tri(mis)], na.rm = TRUE)
-		maxp<-max(mis[upper.tri(mis)], na.rm = TRUE)
+		minp <- min(mis[upper.tri(mis)], na.rm = TRUE)
+		maxp <- max(mis[upper.tri(mis)], na.rm = TRUE)
 		if(maxp==minp){
-			minp <- max(0,minp-0.5)
-			maxp <- maxp+0.5
+			minp <- max(0, minp - 0.5)
+			maxp <- maxp + 0.5
 		}
 	}else{
-		mis<-log(getDeps(data) / nrow(data$data))
+		mis <- log(getDeps(data) / nrow(data$data))
 		
-		minp<-log(0.01);
-		maxp<-log(log(length(alphabet)))
+		minp <- log(0.01)
+		maxp <- log(log(length(alphabet)))
 	}
 	
 	if(is.null(axis.labels)){
-		axis.labels<-1:ncol(mis)
+		axis.labels <- 1:ncol(mis)
 	}
 	
 	if(axis.at.bottom){
-		plot(x = NA,xlim=c(0.5,ncol(mis)+0.5),ylim=c(0,ncol(mis)/2),axes=F,xlab="",ylab="",xaxs="i")
-		axis(side = 1,tcl=.5,line = 2,at=1:ncol(mis),labels=NA)
-		axis(side = 1,col=0,line=-.3*max(nchar(as.character(axis.labels))),at=1:ncol(mis),labels=axis.labels)
+		plot(x = NA, xlim = c(0.5,ncol(mis) + 0.5), ylim = c(0, ncol(mis)/2), axes = FALSE, xlab = "", ylab = "", xaxs = "i")
+		axis(side = 1, tcl = .5, line = 2, at = 1:ncol(mis), labels = NA)
+		axis(side = 1, col=0, line = -.3 * max(nchar(as.character(axis.labels))), at = 1:ncol(mis), labels = axis.labels)
 	}else{
-		plot(x = NA,xlim=c(0.5,ncol(mis)+0.5),ylim=c(ncol(mis)/2,0),axes=F,xlab="",ylab="",xaxs="i")
-		axis(side = 3,tcl=.5,line = 2,at=1:ncol(mis),labels=NA)
-		axis(side = 3,col=0,line=-.3*max(nchar(as.character(axis.labels)))/2,at=1:ncol(mis),labels=axis.labels)
+		plot(x = NA, xlim = c(0.5, ncol(mis) + 0.5), ylim = c(ncol(mis)/2, 0), axes=FALSE, xlab = "", ylab = "", xaxs = "i")
+		axis(side = 3, tcl = .5, line = 2, at = 1:ncol(mis), labels = NA)
+		axis(side = 3, col = 0, line = -.3 * max(nchar(as.character(axis.labels)))/2, at = 1:ncol(mis), labels = axis.labels)
 	}
 	
-	minp.col<-t(col2rgb("white"))
-	maxp.col<-t(col2rgb("black"))
+	minp.col <- t(col2rgb("white"))
+	maxp.col <- t(col2rgb("black"))
 	for(i in 2:nrow(mis)){
 		for(j in 1:(i-1)){
-			mix<-max(0,(mis[i,j]-minp)/(maxp-minp))
+			mix <- max(0, (mis[i,j] - minp)/(maxp - minp))
 			if(is.na(mix)){
-				print(c(i,j,mix,mis[i,j],maxp,minp))
+				print(c(i, j, mix, mis[i,j], maxp, minp))
 			}
 			
-			col<-rgb(mix*maxp.col + (1-mix)*minp.col,maxColorValue = 255)
-			cent.x<-(i+j)/2
-			cent.y<-(i-j)*0.5
-			polygon(x = c(cent.x-0.5,cent.x,cent.x+0.5,cent.x),y = c(cent.y,cent.y+0.5,cent.y,cent.y-0.5),col=col,border = "grey")
+			col <- rgb(mix * maxp.col + (1-mix) * minp.col, maxColorValue = 255)
+			cent.x <- (i + j)/2
+			cent.y <- (i - j)*0.5
+			polygon(x = c(cent.x - 0.5, cent.x, cent.x + 0.5, cent.x), y = c(cent.y, cent.y + 0.5, cent.y, cent.y - 0.5), col = col, border = "grey")
 		}
 	}
 	
 	if(add.legend){	
-		addLegend(minp,maxp,minp.col,maxp.col,axis.at.bottom,pvals=show.pvals)
+		addLegend(minp, maxp, minp.col, maxp.col, axis.at.bottom, pvals = show.pvals)
 	}
 }
 
@@ -466,83 +509,89 @@ plotDepmatrix<-function(data, axis.at.bottom=TRUE,add.legend=TRUE, show.pvals=FA
 #'   
 #' @examples
 #' # create DLData object
-#' seqs<-read.table(system.file("extdata", "cjun.txt", package = "DepLogo"),stringsAsFactors = FALSE)
-#' data<-DLData(sequences = seqs[,1],weights = log(seqs[,2]+1) )
+#' seqs <- read.table(system.file("extdata", "cjun.txt", package = "DepLogo"), 
+#'     stringsAsFactors = FALSE)
+#' data <- DLData(sequences = seqs[,1], weights = log1p(seqs[, 2]) )
 #' 
 #' # plot using default parameters
 #' plotDeparcs(data)
 #' 
 #' # plot with axis at top, without a legend (color scale), and using p-values
-#' plotDeparcs(data, axis.at.bottom=FALSE, add.legend=FALSE, show.pvals=TRUE)
-plotDeparcs<-function(data, axis.at.bottom=TRUE,add.legend=TRUE, show.pvals=FALSE,axis.labels=NULL,threshold=0.1){
+#' plotDeparcs(data, axis.at.bottom = FALSE, add.legend = FALSE, show.pvals = TRUE)
+plotDeparcs<-function(data,
+					  axis.at.bottom = TRUE,
+					  add.legend = TRUE,
+					  show.pvals = FALSE,
+					  axis.labels = NULL,
+					  threshold = 0.1){
 	if(is.null(axis.labels)){
 		axis.labels <- data$axis.labels
 	}
-	alphabet<-data$alphabet$chars
+	alphabet <- data$alphabet$chars
 	if(show.pvals){
-		stat<-getDeps(data)*2
-		stat[stat<threshold*2*nrow(data$data)]<-NA
+		stat <- getDeps(data) * 2
+		stat[stat<threshold * 2 * nrow(data$data)] <- NA
 		
-		mis<- (-log10(pchisq(stat,df = (length(alphabet)-1)^2,lower.tail = FALSE)) )
-		suppressWarnings( rang<-range(mis[!is.infinite(mis)],na.rm=TRUE) );
+		mis<- (-log10(pchisq(stat,df = (length(alphabet)-1)^2, lower.tail = FALSE)) )
+		suppressWarnings( rang <- range(mis[!is.infinite(mis)], na.rm = TRUE) )
 		if(rang[2] > rang[1]){
-			mis[is.infinite(mis)]<-rang[2]
+			mis[is.infinite(mis)] <- rang[2]
 		}else{
-			mis[mis>100]<- 100
+			mis[mis>100] <- 100
 		}
 		
-		minp<-min(mis[upper.tri(mis)], na.rm = TRUE)
-		maxp<-max(mis[upper.tri(mis)], na.rm = TRUE)
+		minp <- min(mis[upper.tri(mis)], na.rm = TRUE)
+		maxp <- max(mis[upper.tri(mis)], na.rm = TRUE)
 		if(maxp==minp){
-			minp <- max(0,minp-0.5)
-			maxp <- maxp+0.5
+			minp <- max(0,minp - 0.5)
+			maxp <- maxp + 0.5
 		}
 	}else{
-		mis<-log(getDeps(data) / nrow(data$data))
+		mis <- log(getDeps(data) / nrow(data$data))
 		
-		minp<-log(threshold);
-		maxp<-log(log(length(alphabet)))
+		minp <- log(threshold)
+		maxp <- log(log(length(alphabet)))
 	}
 	
-	maxd<-0;
-	temp<-which(mis>minp,arr.ind = T)
+	maxd <- 0;
+	temp <- which(mis>minp, arr.ind = TRUE)
 	if(length(temp)>0){
-		maxd<-max(abs(temp[,1]-temp[,2]))
+		maxd <- max(abs(temp[, 1] - temp[, 2]))
 	}
 	
-	max.y<-(maxd+1)/2;
+	max.y <- (maxd + 1)/2
 	if(add.legend){
-		max.y<-max.y*1.5
+		max.y <- max.y * 1.5
 	}
 	
 	if(is.null(axis.labels)){
-		axis.labels<-1:ncol(mis)
+		axis.labels <- 1:ncol(mis)
 	}
 	
 	if(axis.at.bottom){
-		plot(x = NA,xlim=c(0.5,ncol(mis)+0.5),ylim=c(0,max.y),axes=F,xlab="",ylab="",xaxs="i")
-		axis(side = 1,tcl=.5,line = 2,at=1:ncol(mis),labels=NA)
-		axis(side = 1,col=0,line=-.3*max(nchar(as.character(axis.labels))),at=1:ncol(mis),labels=axis.labels)
+		plot(x = NA, xlim = c(0.5,ncol(mis) + 0.5), ylim = c(0, max.y), axes = F, xlab = "", ylab = "", xaxs = "i")
+		axis(side = 1, tcl = .5, line = 2, at = 1:ncol(mis), labels = NA)
+		axis(side = 1, col = 0, line = -.3*max(nchar(as.character(axis.labels))), at = 1:ncol(mis), labels = axis.labels)
 	}else{
-		plot(x = NA,xlim=c(0.5,ncol(mis)+0.5),ylim=c(max.y,0),axes=F,xlab="",ylab="",xaxs="i")
-		axis(side = 3,tcl=.5,line = 2,at=1:ncol(mis),labels=NA)
-		axis(side = 3,col=0,line=-.3*max(nchar(as.character(axis.labels))),at=1:ncol(mis),labels=axis.labels)
+		plot(x = NA, xlim = c(0.5, ncol(mis) + 0.5), ylim = c(max.y, 0),axes = F, xlab = "", ylab = "", xaxs = "i")
+		axis(side = 3, tcl = .5, line = 2, at=1:ncol(mis), labels = NA)
+		axis(side = 3, col = 0, line = -.3 * max(nchar(as.character(axis.labels))), at = 1:ncol(mis), labels = axis.labels)
 	}
-	ypos<-0;
+	ypos <- 0
 	
 	for(i in 2:nrow(mis)){
 		for(j in 1:(i-1)){
-			if(!is.na(mis[i,j]) & mis[i,j]>minp){
-				m<-(i+j)/2;
-				rad<-abs(i-j)/2
+			if(!is.na(mis[i, j]) & mis[i, j]>minp){
+				m <- (i + j)/2
+				rad <- abs(i - j)/2
 				
-				drawArc(x = m,y = ypos,radius = rad,col = gray(0, min(1, (mis[i,j]-minp)/(maxp-minp) ) ),lwd=2)
+				drawArc(x = m, y = ypos, radius = rad, col = gray(0, min(1, (mis[i,j] - minp)/(maxp - minp) ) ), lwd = 2)
 			}
 		}
 	}
 
 	if(add.legend){	
-		addLegend(minp,maxp,col2rgb("white"),col2rgb("black"),axis.at.bottom,pvals=show.pvals)
+		addLegend(minp, maxp, col2rgb("white"), col2rgb("black"), axis.at.bottom, pvals = show.pvals)
 	}
 	
 }
@@ -563,23 +612,25 @@ plotDeparcs<-function(data, axis.at.bottom=TRUE,add.legend=TRUE, show.pvals=FALS
 #'
 #' @examples
 #' # read data and create DLData object
-#' seqs<-read.table(system.file("extdata", "cjun.txt", package = "DepLogo"),stringsAsFactors = FALSE)
-#' data<-DLData(sequences = seqs[,1],weights = log(seqs[,2]+1) )
+#' seqs <- read.table(system.file("extdata", "cjun.txt", package = "DepLogo"), 
+#'     stringsAsFactors = FALSE)
+#' data <- DLData(sequences = seqs[,1], weights = log1p(seqs[, 2]) )
 #' 
 #' # create high-level plot
-#' plot(NULL,xlim=c(1,ncol(data$data)-1),ylim=c(0,nrow(data$data)),ylab=nrow(data$data),axes=FALSE)
+#' plot(NULL, xlim = c(1, ncol(data$data) - 1), ylim = c(0, nrow(data$data)), 
+#'     ylab = nrow(data$data), axes = FALSE)
 #' # and add colorchart and axis
-#' colorchart(data,yoff=nrow(data$data))
+#' colorchart(data, yoff = nrow(data$data))
 #' axis(1)
-colorchart<-function(part, yoff, ic.scale=TRUE){
+colorchart<-function(part, yoff, ic.scale = TRUE){
 
-	mat<-as.matrix(part$data[,-ncol(part$data)])
-	map<-1:length(part$alphabet$chars)
-	names(map)<-part$alphabet$chars
-	mat<-matrix(map[mat],ncol=ncol(mat))
+	mat <- as.matrix(part$data[, -ncol(part$data)])
+	map <- 1:length(part$alphabet$chars)
+	names(map) <- part$alphabet$chars
+	mat <- matrix(map[mat], ncol = ncol(mat))
 
-	image(x=1:ncol(mat),y=(yoff-nrow(mat)):yoff,t(mat),col=part$alphabet$cols,add=T)
-	yoff-nrow(mat)
+	image(x = 1:ncol(mat), y = (yoff - nrow(mat)):yoff, t(mat), col = part$alphabet$cols, add = TRUE)
+	yoff - nrow(mat)
 }
 
 #' Plot a representation of a set of sequences by rectangles of (scaled) averaged color values of the symbols at each position.
@@ -597,22 +648,24 @@ colorchart<-function(part, yoff, ic.scale=TRUE){
 #'
 #' @examples
 #' # read data and create DLData object
-#' seqs<-read.table(system.file("extdata", "cjun.txt", package = "DepLogo"),stringsAsFactors = FALSE)
-#' data<-DLData(sequences = seqs[,1],weights = log(seqs[,2]+1) )
+#' seqs <- read.table(system.file("extdata", "cjun.txt", package = "DepLogo"),  
+#'    stringsAsFactors = FALSE)
+#' data <- DLData(sequences = seqs[, 1],weights = log1p(seqs[, 2]) )
 #' 
 #' # create high-level plot
-#' plot(NULL,xlim=c(1,ncol(data$data)-1),ylim=c(0,nrow(data$data)),ylab=nrow(data$data),axes=FALSE)
+#' plot(NULL, xlim = c(1, ncol(data$data) - 1), ylim = c(0, nrow(data$data)), 
+#'     ylab = nrow(data$data), axes = FALSE)
 #' # and add deprects and axis
-#' deprects(data,yoff=nrow(data$data))
+#' deprects(data, yoff = nrow(data$data))
 #' axis(1)
-deprects<-function(part, yoff, ic.scale=TRUE){
-	pwm<-getPWM.DLData(part)
-	size<-nrow(part$data)
-	sapply(1:ncol(pwm),function(i){
-		color<-getColor(pwm[,i],ifelse(ic.scale,getICScale(pwm[,i])*255,255),part$alphabet$cols);
-		rect(i-.5,yoff-size,i+.5,yoff,col = color,border=NA)
+deprects<-function(part, yoff, ic.scale = TRUE){
+	pwm <- getPWM.DLData(part)
+	size <- nrow(part$data)
+	sapply(1:ncol(pwm), function(i){
+		color <- getColor(pwm[, i], ifelse(ic.scale, getICScale(pwm[, i]) * 255, 255), part$alphabet$cols);
+		rect(i - .5, yoff - size, i + .5, yoff, col = color, border=NA)
 	})
-	yoff-size
+	yoff - size
 }
 
 #' Plot a representation of a set of sequences as a sequence logo
@@ -630,21 +683,23 @@ deprects<-function(part, yoff, ic.scale=TRUE){
 #'
 #' @examples
 #' # read data and create DLData object
-#' seqs<-read.table(system.file("extdata", "cjun.txt", package = "DepLogo"),stringsAsFactors = FALSE)
-#' data<-DLData(sequences = seqs[,1],weights = log(seqs[,2]+1) )
+#' seqs <- read.table(system.file("extdata", "cjun.txt", package = "DepLogo"), 
+#'     stringsAsFactors = FALSE)
+#' data <- DLData(sequences = seqs[, 1], weights = log1p(seqs[,2]) )
 #' 
 #' # create high-level plot
-#' plot(NULL,xlim=c(1,ncol(data$data)-1),ylim=c(0,nrow(data$data)),ylab=nrow(data$data),axes=FALSE)
+#' plot(NULL, xlim = c(1, ncol(data$data) - 1), ylim = c(0, nrow(data$data)),  
+#'    ylab = nrow(data$data), axes = FALSE)
 #' # and add sequence logo and axis
-#' logo(data,yoff=nrow(data$data))
+#' logo(data, yoff = nrow(data$data))
 #' axis(1)
-logo<-function(part, yoff, ic.scale=TRUE){
-	pwm<-getPWM(part)
-	size<-nrow(part$data)
-	alphabet<-part$alphabet
+logo <- function(part, yoff, ic.scale = TRUE){
+	pwm <- getPWM(part)
+	size <- nrow(part$data)
+	alphabet <- part$alphabet
 	
-	letters = list(x = NULL, y = NULL, id = NULL, fill = NULL)
-	npos = ncol(pwm)
+	letters <- list(x = NULL, y = NULL, id = NULL, fill = NULL)
+	npos <- ncol(pwm)
 	wt <- 1
 	x.pos <- 0.5
 	eps <- 0
@@ -653,14 +708,14 @@ logo<-function(part, yoff, ic.scale=TRUE){
 	ymaxs <- c()
 	for (j in 1:npos) {
 		column <- pwm[, j]
-		sh <- ifelse(ic.scale,getICScale(column)^2,1)
-		hts <- column * sh*size
+		sh <- ifelse(ic.scale, getICScale(column)^2, 1)
+		hts <- column * sh * size
 		letterOrder <- order(abs(hts))
-		ypos.pos <- yoff-size
+		ypos.pos <- yoff - size
 		
-		hts<-hts[letterOrder]
-		chars<-alphabet$chars[letterOrder]
-		cols<-alphabet$cols[letterOrder]
+		hts <- hts[letterOrder]
+		chars <- alphabet$chars[letterOrder]
+		cols <- alphabet$cols[letterOrder]
 		
 		for (i in 1:alphabet$size) {
 			ht <- hts[i]
@@ -669,13 +724,13 @@ logo<-function(part, yoff, ic.scale=TRUE){
 			ypos.pos <- ypos.pos + ht + eps
 			char <- chars[i]
 			col <- cols[i]
-			let<-getLetter(letterPolygons[[char]],x.pos,y.pos,ht,wt*0.99,col=col)
-			polygon(let,col=let$col,border=NA)
+			let <- getLetter(letterPolygons[[char]], x.pos, y.pos, ht, wt*0.99, col = col)
+			polygon(let, col = let$col, border = NA)
 		}
 		
 		x.pos <- x.pos + wt
 	}
-	yoff-size
+	yoff - size
 }
 
 #' Plots blocks of data
@@ -698,43 +753,44 @@ logo<-function(part, yoff, ic.scale=TRUE){
 #'
 #' @examples
 #' # read data and create DLData object
-#' seqs<-read.table(system.file("extdata", "cjun.txt", package = "DepLogo"),stringsAsFactors = FALSE)
-#' data<-DLData(sequences = seqs[,1],weights = log(seqs[,2]+1) )
+#' seqs <- read.table(system.file("extdata", "cjun.txt", package = "DepLogo"), 
+#'     stringsAsFactors = FALSE)
+#' data <- DLData(sequences = seqs[, 1], weights = log1p(seqs[, 2]) )
 #' 
 #' # plot all data
 #' plotBlocks(data)
 #' 
 #' # partition data
-#' partitions <- partition(data,threshold=0.3)
+#' partitions <- partition(data, threshold = 0.3)
 #' # and plot partitions
 #' plotBlocks(partitions)
 #' 
 #' # or plot partitions as sequence logos
-#' plotBlocks(partitions,block.fun=logo)
-plotBlocks<-function(data,show.number=TRUE,block.fun=deprects,ic.scale=TRUE,add=FALSE,...){
-	UseMethod("plotBlocks",data)
+#' plotBlocks(partitions, block.fun = logo)
+plotBlocks <- function(data, show.number = TRUE, block.fun = deprects, ic.scale = TRUE, add = FALSE, ...){
+	UseMethod("plotBlocks", data)
 }
 
-plotBlocks.DLData<-function(data,show.number=TRUE,block.fun=deprects,ic.scale=TRUE,add=FALSE,...){
-	plotBlocks.list(data=list(data),show.number = show.number, block.fun = block.fun,ic.scale = ic.scale,add = add,...)	
+plotBlocks.DLData <- function(data, show.number = TRUE, block.fun = deprects, ic.scale = TRUE, add = FALSE, ...){
+	plotBlocks.list(data = list(data), show.number = show.number, block.fun = block.fun, ic.scale = ic.scale, add = add, ...)	
 }
 
-plotBlocks.list<-function(data,show.number=TRUE,block.fun=deprects,ic.scale=TRUE,add=FALSE,...){
-	total<-sum(sapply(data,function(a){nrow(a$data)}))
+plotBlocks.list <- function(data, show.number = TRUE, block.fun = deprects, ic.scale = TRUE, add=FALSE, ...){
+	total <- sum(sapply(data, function(a){nrow(a$data)}))
 
-	len<-ncol(data[[1]]$data)-1;
+	len <- ncol(data[[1]]$data) - 1
 	if(!add){
-		plot(NULL,xlim=c(0.5,len+0.5),ylim=c(0,total+2),axes=F,yaxs='i',xaxs="i",xlab="",ylab="",...)
+		plot(NULL, xlim = c(0.5, len + 0.5), ylim = c(0, total + 2), axes = F, yaxs = 'i', xaxs = "i", xlab = "", ylab = "", ...)
 	}
 	if(show.number){
-		mtext(side = 2,line = 1,text = paste("N =",total),cex=par("cex"))
+		mtext(side = 2, line = 1, text = paste("N =", total), cex = par("cex"))
 	}
 
-	t<-sapply(data,function(a){
-		total<<-block.fun(a,total,ic.scale)
+	t <- sapply(data, function(a){
+		total <<- block.fun(a, total, ic.scale)
 	})
 	if(length(data)>1){
-		lines(x = c(0.5,len+0.5),y = c(total,total),col=1,lwd=2)
+		lines(x = c(0.5,len + 0.5), y = c(total, total), col = 1, lwd = 2)
 	}
 }
 
@@ -801,104 +857,133 @@ plotBlocks.list<-function(data,show.number=TRUE,block.fun=deprects,ic.scale=TRUE
 #'   
 #' @examples
 #' # read data and create DLData object
-#' seqs<-read.table(system.file("extdata", "cjun.txt", package = "DepLogo"),stringsAsFactors = FALSE)
-#' data<-DLData(sequences = seqs[,1],weights = log(seqs[,2]+1) )
+#' seqs <- read.table(system.file("extdata", "cjun.txt", package = "DepLogo"), 
+#'     stringsAsFactors = FALSE)
+#' data <- DLData(sequences = seqs[, 1],weights = log1p(seqs[, 2]) )
 #' 
 #' # plot default dependency logo
 #' plotDeplogo(data)
 #' 
 #' # refine threshold for clearer picture
-#' plotDeplogo(data,threshold=0.3)
+#' plotDeplogo(data, threshold = 0.3)
 #' 
 #' # customize different parts of the plot
-#' plotDeplogo(data,threshold=0.3,dep.fun=plotDepmatrix,block.fun=colorchart)
+#' plotDeplogo(data, threshold = 0.3, dep.fun = plotDepmatrix, block.fun = colorchart)
 #' 
 #' # add plots of the weights
-#' plotDeplogo(data,weight.fun=subBoxes)
-plotDeplogo<-function(data, dep.fun=plotDeparcs, block.fun=deprects, summary.fun=logo, weight.fun=NULL, chunks=NULL,chunk.height=800,summary.height=100,
-					  minPercent=0.03,threshold=0.1,numBestForSorting=3,maxNum=6,sortByWeights=NULL,dep.fun.legend=TRUE,show.dependency.pvals=FALSE,axis.labels=NULL,...){
-	UseMethod("plotDeplogo",data)
+#' plotDeplogo(data, weight.fun = subBoxes)
+plotDeplogo<-function(data,
+					  dep.fun = plotDeparcs,
+					  block.fun = deprects,
+					  summary.fun = logo,
+					  weight.fun = NULL,
+					  chunks = NULL,
+					  chunk.height = 800,
+					  summary.height = 100,
+					  minPercent = 0.03,
+					  threshold = 0.1,
+					  numBestForSorting = 3,
+					  maxNum = 6,
+					  sortByWeights = NULL,
+					  dep.fun.legend = TRUE,
+					  show.dependency.pvals = FALSE,
+					  axis.labels = NULL,
+					  ...){
+	UseMethod("plotDeplogo", data)
 }
 
-plotDeplogo.DLData<-function(data, dep.fun=plotDeparcs, block.fun=deprects, summary.fun=logo, weight.fun=NULL, chunks=NULL,chunk.height=800,summary.height=100,
-					   minPercent=0.03,threshold=0.1,numBestForSorting=3,maxNum=6,sortByWeights=NULL,dep.fun.legend=TRUE,show.dependency.pvals=FALSE,
-							 axis.labels=NULL,...){
+plotDeplogo.DLData<-function(data,
+							dep.fun = plotDeparcs,
+							block.fun = deprects,
+							summary.fun = logo,
+							weight.fun = NULL,
+							chunks = NULL,
+							chunk.height = 800,
+							summary.height = 100,
+							minPercent = 0.03,
+							threshold = 0.1,
+							numBestForSorting = 3,
+							maxNum = 6,
+							sortByWeights = NULL,
+							dep.fun.legend = TRUE,
+							show.dependency.pvals = FALSE,
+							axis.labels = NULL, ...){
 	
 	if(is.null(chunks)){
-		chunks<-nrow(data$data)
+		chunks <- nrow(data$data)
 	}
 	if(sum(chunks)>nrow(data$data)){
-		stop("Chunk sizes larger than data.");
+		stop("Chunk sizes larger than data.")
 	}
 	if(length(chunks) != length(chunk.height)){
-		stop("Not the same number of chunks as number of chunk sizes");
+		stop("Not the same number of chunks as number of chunk sizes")
 	}
 	
 	if(is.null(sortByWeights)){
-		sortByWeights<-data$sortByWeights;
+		sortByWeights <- data$sortByWeights;
 	}
 	
 	if(sortByWeights && !data$sortByWeights){
-		o<-order(data$data$weights,decreasing = T);
-		data$data<-data$data[o,]
+		o <- order(data$data$weights, decreasing = TRUE);
+		data$data <- data$data[o, ]
 	}
 	
 	if(is.null(axis.labels)){
 		axis.labels <- data$axis.labels
 	}
 	
-	parts<-split(x = data$data,f = rep(1:length(chunks),chunks));
-	parts<-lapply(parts,function(a){
-		li<-list(data=a,alphabet=data$alphabet,sortByWeights=sortByWeights)
-		class(li)<-"DLData"
+	parts <- split(x = data$data, f = rep(1:length(chunks), chunks))
+	parts <- lapply(parts, function(a){
+		li <- list(data = a, alphabet = data$alphabet, sortByWeights = sortByWeights)
+		class(li) <- "DLData"
 		li
 	})
 	
-	total.height<-sum(chunk.height)+summary.height*(length(chunks)-1)+summary.height*3.5
-	numPlots<-length(chunks)*2+1+1
-	height<-c(summary.height*3,as.vector(rbind(chunk.height,rep(summary.height,length(chunk.height)))),summary.height)/total.height
+	total.height <- sum(chunk.height) + summary.height * (length(chunks) - 1) + summary.height * 3.5
+	numPlots <- length(chunks) * 2 + 1 + 1
+	height <- c(summary.height * 3, as.vector(rbind(chunk.height, rep(summary.height, length(chunk.height)))), summary.height)/total.height
 
-	bak<-par(no.readonly = T);
-	on.exit(par(bak));
-	par(mar=c(2,2.5,0,ifelse(!is.null(weight.fun),0,1)))
+	bak <- par(no.readonly = TRUE)
+	on.exit(par(bak))
+	par(mar = c(2, 2.5, 0, ifelse(!is.null(weight.fun), 0, 1)))
 	
 	if(!is.null(weight.fun)){
-		layout( mat = matrix(1:(2*numPlots),ncol=2),widths = c(ncol(data$data)-1,(ncol(data$data)-1)/5),heights=height )
+		layout(mat = matrix(1:(2 * numPlots), ncol=2), widths = c(ncol(data$data) - 1, (ncol(data$data) - 1)/5), heights = height)
 	}else{
-		layout( mat = matrix(1:numPlots,ncol=1),widths = c(1),heights=height )
+		layout(mat = matrix(1:numPlots, ncol = 1), widths = c(1), heights = height)
 	}
 	
-	dep.fun(data = data,add.legend=dep.fun.legend,show.pvals=show.dependency.pvals,axis.labels=axis.labels,threshold=threshold);
-	par(mar=c(0,2.5,0,ifelse(!is.null(weight.fun),0,1)))
+	dep.fun( data = data, add.legend = dep.fun.legend, show.pvals = show.dependency.pvals, axis.labels = axis.labels, threshold = threshold)
+	par(mar = c(0, 2.5, 0, ifelse(!is.null(weight.fun), 0, 1)))
 
-	w.li<-list();
-	sapply(1:length(parts),function(i){
-		sub.parts<-partition.DLData(data = parts[[i]],minElements = nrow(parts[[i]]$data)*minPercent,
-							 threshold = threshold,numBestForSorting = numBestForSorting, maxNum = maxNum);
+	w.li <- list()
+	sapply(1:length(parts), function(i){
+		sub.parts <- partition.DLData(data = parts[[i]], minElements = nrow(parts[[i]]$data) * minPercent,
+							 threshold = threshold, numBestForSorting = numBestForSorting, maxNum = maxNum)
 
-		plotBlocks(data = sub.parts,show.number = TRUE, block.fun = block.fun,ic.scale = TRUE, add = FALSE,...)
-		plotBlocks(data = parts[[i]],show.number = FALSE, block.fun = summary.fun,ic.scale = TRUE,add = FALSE,... )
+		plotBlocks(data = sub.parts, show.number = TRUE, block.fun = block.fun, ic.scale = TRUE, add = FALSE, ...)
+		plotBlocks(data = parts[[i]], show.number = FALSE, block.fun = summary.fun, ic.scale = TRUE, add = FALSE, ... )
 	
 		for(j in 1:length(sub.parts)){
-			sub.parts[[j]]$data<-sub.parts[[j]]$data[order(sub.parts[[j]]$data$weights,decreasing = T),]
+			sub.parts[[j]]$data <- sub.parts[[j]]$data[order(sub.parts[[j]]$data$weights, decreasing = T), ]
 		}
 		
-		w.li<<-c(w.li,list(sub.parts))
+		w.li <<- c(w.li, list(sub.parts))
 	})
 	
-	par(mar=c(1.5,2.5,0,ifelse(!is.null(weight.fun),0,1)))
-	plot(x = NA,xlim = c(0.5, ncol(data$data)-0.5), ylim = c(0, 1),
-		 axes=F,frame.plot=F,xlab="",ylab="",yaxs='i',xaxs="i")
-	axis(side = 1,at=1:(ncol(data$data)-1),labels=axis.labels,cex=par("cex"),pos=1)
+	par(mar = c(1.5, 2.5, 0, ifelse(!is.null(weight.fun), 0, 1)))
+	plot(x = NA, xlim = c(0.5, ncol(data$data) - 0.5), ylim = c(0, 1),
+		 axes = F, frame.plot = F, xlab = "", ylab = "", yaxs = 'i', xaxs = "i")
+	axis(side = 1, at = 1:(ncol(data$data) - 1), labels = axis.labels, cex = par("cex"), pos = 1)
 	
 	if(!is.null(weight.fun)){
-		par(mar=c(0,.5,0,1))
+		par(mar = c(0, .5, 0, 1))
 		plot.new()
-		range<-range(data$data$weights)
+		range <- range(data$data$weights)
 		
 		for(i in 1:length(w.li)){
-			el<-w.li[[i]]
-			weight.fun(el,range,axis.above=(i==1),axis.below=TRUE)
+			el <- w.li[[i]]
+			weight.fun(el, range, axis.above = (i==1), axis.below = TRUE)
 			
 			plot.new()
 		}	
@@ -928,22 +1013,25 @@ plotDeplogo.DLData<-function(data, dep.fun=plotDeparcs, block.fun=deprects, summ
 #' 
 #' @examples
 #' # read data and create DLData object
-#' seqs<-read.table(system.file("extdata", "nrsf.txt", package = "DepLogo"),stringsAsFactors = FALSE)
-#' data<-DLData(sequences = seqs[,1],weights = log(seqs[,2]+1) )
+#' seqs <- read.table(system.file("extdata", "nrsf.txt", package = "DepLogo"), 
+#'     stringsAsFactors = FALSE)
+#' data <- DLData(sequences = seqs[, 1], weights = log1p(seqs[, 2]) )
 #' 
 #' # create dependency logo with plotted weights
-#' plotDeplogo(data,threshold=0.03,weight.fun=subLines)
-subLines<-function(sub.parts,range, axis.above=TRUE, axis.below=TRUE){
-	total<-sum(sapply(sub.parts,function(a){nrow(a$data)}))
-	plot(NULL,xlim=range,ylim=c(total,1),axes=F,yaxs='i')
+#' plotDeplogo(data, threshold = 0.03, weight.fun = subLines)
+subLines <- function(sub.parts, range, axis.above = TRUE, axis.below = TRUE){
+	total <- sum(sapply(sub.parts, function(a){nrow(a$data)}))
+	plot(NULL, xlim = range, ylim = c(total, 1), axes = FALSE, yaxs = 'i')
 	if(axis.below) axis(1)
 	if(axis.above) axis(3)
-	cum<-1;
+	cum <- 1
 	for(part in sub.parts){
-		if(cum>1){abline(h = cum,lwd=1,col="grey")}
-		lines(x = part$data$weights,y=cum:(cum+nrow(part$data)-1))
-		lines(x=c(median(part$data$weights),median(part$data$weights)),y=c(cum,cum+nrow(part$data)-1),col=2)
-		cum<-cum+nrow(part$data)
+		if(cum>1){
+			abline(h = cum, lwd = 1, col = "grey")
+		}
+		lines(x = part$data$weights, y = cum:(cum + nrow(part$data) - 1))
+		lines(x = c(median(part$data$weights), median(part$data$weights)), y = c(cum, cum + nrow(part$data) - 1), col = 2)
+		cum <- cum + nrow(part$data)
 	}
 }
 
@@ -963,35 +1051,36 @@ subLines<-function(sub.parts,range, axis.above=TRUE, axis.below=TRUE){
 #' 
 #' @examples
 #' # read data and create DLData object
-#' seqs<-read.table(system.file("extdata", "nrsf.txt", package = "DepLogo"),stringsAsFactors = FALSE)
-#' data<-DLData(sequences = seqs[,1],weights = log(seqs[,2]+1) )
+#' seqs <- read.table(system.file("extdata", "nrsf.txt", package = "DepLogo"), 
+#'     stringsAsFactors = FALSE)
+#' data <- DLData(sequences = seqs[, 1], weights = log1p(seqs[, 2]) )
 #' 
 #' # create dependency logo with plotted weights
-#' plotDeplogo(data,threshold=0.03,weight.fun=subBoxes)
-subBoxes<-function(sub.parts,range, axis.above=TRUE, axis.below=TRUE){
-	total<-sum(sapply(sub.parts,function(a){nrow(a$data)}))
-	plot(NULL,xlim=range,ylim=c(total,1),axes=F,yaxs='i')
+#' plotDeplogo(data, threshold = 0.03, weight.fun = subBoxes)
+subBoxes <- function(sub.parts, range, axis.above = TRUE, axis.below = TRUE){
+	total <- sum(sapply(sub.parts, function(a){nrow(a$data)}))
+	plot(NULL, xlim = range, ylim = c(total, 1), axes = FALSE, yaxs = 'i')
 	if(axis.below) axis(1)
 	if(axis.above) axis(3)
-	cum<-1;
+	cum <- 1
 	for(part in sub.parts){
-		stats<-boxplot.stats(part$data$weights)
-		lines(x = c(stats$stats[1],stats$stats[5]),y = c(cum+nrow(part$data)/2,cum+nrow(part$data)/2),lty="dashed")
-		lines(x = c(stats$stats[1],stats$stats[1]),y = c(cum+nrow(part$data)*0.35,cum+nrow(part$data)*0.65))
-		lines(x = c(stats$stats[5],stats$stats[5]),y = c(cum+nrow(part$data)*0.35,cum+nrow(part$data)*0.65))
-		rect(xleft = stats$stats[2],ybottom = cum+nrow(part$data)*0.2, xright = stats$stats[4],ytop = cum+nrow(part$data)*0.8,col = "white")
-		lines(x = c(stats$stats[3],stats$stats[3]),y = cum+nrow(part$data)*c(0.2,0.8),lwd=2,col=4)
-		points(x = stats$out, y=rep(cum+nrow(part$data)/2,length(stats$out)),col=rgb(0,0,0,0.2))
-		cum<-cum+nrow(part$data)
+		stats <- boxplot.stats(part$data$weights)
+		lines(x = c(stats$stats[1], stats$stats[5]), y = c(cum + nrow(part$data)/2, cum + nrow(part$data)/2), lty = "dashed")
+		lines(x = c(stats$stats[1], stats$stats[1]), y = c(cum + nrow(part$data) * 0.35, cum + nrow(part$data) * 0.65))
+		lines(x = c(stats$stats[5], stats$stats[5]), y = c(cum + nrow(part$data) * 0.35, cum + nrow(part$data) * 0.65))
+		rect(xleft = stats$stats[2], ybottom = cum + nrow(part$data) * 0.2, xright = stats$stats[4], ytop = cum + nrow(part$data) * 0.8, col = "white")
+		lines(x = c(stats$stats[3], stats$stats[3]), y = cum + nrow(part$data) * c(0.2, 0.8),lwd = 2, col = 4)
+		points(x = stats$out, y = rep(cum + nrow(part$data)/2, length(stats$out)), col = rgb(0,0,0,0.2))
+		cum<-cum + nrow(part$data)
 	}
 }
 
 
-length.DLData<-function(x){
+length.DLData <- function(x){
 	nrow(x$data)
 }
 
-dim.DLData<-function(x){
+dim.DLData <- function(x){
 	dim(x$data)
 }
 
@@ -1033,55 +1122,62 @@ dim.DLData<-function(x){
 #' @examples 
 #' # creating a DLData object using default (DNA) alphabet and colors
 #' # from a character vector with two entries
-#' data<-DLData(c("ACGT","ATTA"))
+#' data <- DLData(c("ACGT", "ATTA"))
 #' 
 #' # creating a DLData object using a custom, binary alphabet and custom colors
-#' data2<-DLData(c("A,B,B,A,B","A,B,B,A,A","A,B,A,A,B"),
-#'     symbols=c("A","B"),colors=c("red","green"),delim=",")
+#' data2 <- DLData(c("A,B,B,A,B", "A,B,B,A,A", "A,B,A,A,B"),
+#'     symbols = c("A", "B"), colors = c("red","green"), delim = ",")
 #' 
 #' # creating a DLData object from a data frame 
 #' # (created from a character vector, in this case)
-#' vec<-c("A,B,B,A,B","A,B,B,A,A","A,B,A,A,B")
-#' df<-as.data.frame(t(sapply(vec,function(a){strsplit(a,",")[[1]]})))
-#' data.df<-DLData(df,symbols=c("A","B"),colors=c("red","green"))
+#' vec <- c("A,B,B,A,B", "A,B,B,A,A", "A,B,A,A,B")
+#' df <- as.data.frame(t(sapply(vec, function(a){strsplit(a, ",")[[1]]})))
+#' data.df <- DLData(df, symbols = c("A", "B"), colors = c("red", "green"))
 #' 
 #' # creating a DLData object from sequences and weights, read from a tabular file
-#' seqs<-read.table(system.file("extdata", "cjun.txt", package = "DepLogo"),stringsAsFactors = FALSE)
-#' data3<-DLData(sequences = seqs[,1],weights = log(seqs[,2]+1) )
-DLData<-function(sequences,weights=NULL,symbols=alphabet.dna$alphabet,colors=alphabet.dna$colors,delim="",sortByWeights=!is.null(weights), axis.labels=NULL ){
-	sortByWeights<-sortByWeights
+#' seqs <- read.table(system.file("extdata", "cjun.txt", package = "DepLogo"), 
+#'     stringsAsFactors = FALSE)
+#' data3 <- DLData(sequences = seqs[, 1], weights = log1p(seqs[, 2]) )
+DLData<-function(sequences,
+				 weights = NULL,
+				 symbols = alphabet.dna$alphabet,
+				 colors = alphabet.dna$colors,
+				 delim = "",
+				 sortByWeights = !is.null(weights),
+				 axis.labels = NULL){
+	sortByWeights <- sortByWeights
 	if(class(sequences)=="character"){
 		if( length( unique(sapply(sequences,nchar)) ) != 1 ){
 			stop("All sequences must have the same length.");
 		}
 		
-		seqs<-t(sapply(sequences,function(a){strsplit(a,delim)[[1]]}))
-		rownames(seqs)<-NULL;
+		seqs <- t(sapply(sequences, function(a){strsplit(a, delim)[[1]]}))
+		rownames(seqs) <- NULL
 	}else if(class(sequences)=="data.frame"){
-		seqs<-as.matrix(sequences);
+		seqs <- as.matrix(sequences)
 	}else{
-		stop("Only data.frames or character vectors allowed.");
+		stop("Only data.frames or character vectors allowed.")
 	}
 	if( is.null(weights) ){
-		weights<-rep(1,nrow(seqs))
+		weights <- rep(1, nrow(seqs))
 	}
-	syms<-unique(as.vector(seqs))
+	syms <- unique(as.vector(seqs))
 	if( sum(!syms%in%symbols)>0 ){
 		stop("Provided symbols do not match those of the data.")
 	}
 	if(length(colors) != length(symbols)){
-		stop("Number of colors not equal to number of symbols.");
+		stop("Number of colors not equal to number of symbols.")
 	}
 	
-	df<-data.frame(seqs,weights)
+	df <- data.frame(seqs, weights)
 	
 	if(sortByWeights){
-		o<-order(weights,decreasing = T);
-		df<-df[o,]
+		o <- order(weights, decreasing = TRUE)
+		df <- df[o, ]
 	}
 	
-	li<-list(data=df,alphabet=Alphabet(symbols,colors),sortByWeights=sortByWeights,axis.labels=axis.labels)
-	class(li)<-"DLData"
+	li <- list(data = df, alphabet = Alphabet(symbols, colors), sortByWeights = sortByWeights, axis.labels = axis.labels)
+	class(li) <- "DLData"
 	li
 }
 
@@ -1097,12 +1193,12 @@ DLData<-function(sequences,weights=NULL,symbols=alphabet.dna$alphabet,colors=alp
 #' @author Jan Grau <grau@informatik.uni-halle.de>
 #'
 #' @examples
-#' fun<-filter.by.gaps(percent.gap=0.1)
-filter.by.gaps<-function(percent.gap){
+#' fun <- filter.by.gaps(percent.gap = 0.1)
+filter.by.gaps <- function(percent.gap){
 	function(data){
-		rats<-apply(data$data[,-ncol(data$data)],2,function(a){sum(a=="-")})/nrow(data$data)
-		sel<-(rats<percent.gap)
-		list(selected=sel,range=range(rats))
+		rats <- apply(data$data[, -ncol(data$data)], 2, function(a){sum(a=="-")})/nrow(data$data)
+		sel <- (rats<percent.gap)
+		list(selected = sel, range = range(rats))
 	}
 }
 
@@ -1123,13 +1219,13 @@ filter.by.gaps<-function(percent.gap){
 #' @author Jan Grau <grau@informatik.uni-halle.de>
 #'
 #' @examples
-#' fun<-filter.by.conservation(relative.ic = 0.9)
-filter.by.conservation<-function(relative.ic){
+#' fun <- filter.by.conservation(relative.ic = 0.9)
+filter.by.conservation <- function(relative.ic){
 	function(data){
-		pwm<-getPWM(data)
-		ics<-apply(pwm,2,function(a){getICScale(a)^2})
-		sel<-(ics<relative.ic)
-		list(selected=sel,range=range(ics,na.rm=TRUE))
+		pwm <- getPWM(data)
+		ics <- apply(pwm, 2, function(a){getICScale(a)^2})
+		sel <- (ics<relative.ic)
+		list(selected = sel, range = range(ics, na.rm = TRUE))
 	}
 }
 
@@ -1149,17 +1245,17 @@ filter.by.conservation<-function(relative.ic){
 #' @author Jan Grau <grau@informatik.uni-halle.de>
 #'
 #' @examples
-#' fun<-filter.by.dependencies(mi.threshold = 0.3)
-filter.by.dependencies<-function(mi.threshold, use.max=FALSE){
+#' fun <- filter.by.dependencies(mi.threshold = 0.3)
+filter.by.dependencies <- function(mi.threshold, use.max = FALSE){
 	function(data){
-		deps<-getDeps(data)/nrow(data$data)/log(length(data$alphabet))
+		deps <- getDeps(data)/nrow(data$data)/log(length(data$alphabet))
 		if(use.max){
-			deps<-apply(deps,1,max,na.rm=TRUE)	
+			deps <- apply(deps, 1, max, na.rm = TRUE)	
 		}else{
-			deps<-rowSums(deps)/(ncol(data$data)-1)
+			deps <- rowSums(deps)/(ncol(data$data) - 1)
 		}
-		sel<-deps>=mi.threshold
-		list(selected=sel,range=range(deps,na.rm=TRUE))
+		sel <- deps>=mi.threshold
+		list(selected = sel, range = range(deps, na.rm = TRUE))
 	}
 }
 
@@ -1184,30 +1280,31 @@ filter.by.dependencies<-function(mi.threshold, use.max=FALSE){
 #'
 #' @examples
 #' # read data and create DLData object
-#' seqs<-read.table(system.file("extdata", "cjun.txt", package = "DepLogo"),stringsAsFactors = FALSE)
-#' data<-DLData(sequences = seqs[,1],weights = log(seqs[,2]+1) )
+#' seqs <- read.table(system.file("extdata", "cjun.txt", package = "DepLogo"), 
+#'     stringsAsFactors = FALSE)
+#' data <- DLData(sequences = seqs[, 1], weights = log1p(seqs[, 2]) )
 #' 
 #' # create a filter function based on the percentage of gap symbols (at most 10%)
-#' fun<-filter.by.gaps(percent.gap=0.1)
-#' data2<-filterColumns(data,fun)
-filterColumns<-function(data,filter.fun){
-	UseMethod("filterColumns",data)
+#' fun <- filter.by.gaps(percent.gap = 0.1)
+#' data2 <- filterColumns(data, fun)
+filterColumns <- function(data, filter.fun){
+	UseMethod("filterColumns", data)
 }
 
-filterColumns.DLData<-function(data,filter.fun){
-	ax.lab<-data$axis.labels
+filterColumns.DLData<-function(data, filter.fun){
+	ax.lab <- data$axis.labels
 	if(is.null(ax.lab)){
-		ax.lab<-1:(ncol(data$data)-1)
+		ax.lab <- 1:(ncol(data$data) - 1)
 	}
 	
-	temp<-filter.fun(data)
-	sel<-temp$selected
+	temp <- filter.fun(data)
+	sel <- temp$selected
 	if(sum(sel)==0){
-		stop(paste0("No column matched the filter criteria. Range of values: [",temp$range[1],", ",temp$range[2],"]"));
+		stop(paste0("No column matched the filter criteria. Range of values: [", temp$range[1], ", ", temp$range[2], "]"))
 	}
-	dat2<-data
-	dat2$data <- dat2$data[,c(sel,TRUE)]
-	dat2$axis.labels<-ax.lab[sel]
+	dat2 <- data
+	dat2$data <- dat2$data[, c(sel, TRUE)]
+	dat2$axis.labels <- ax.lab[sel]
 	
 	dat2
 }
@@ -1232,38 +1329,39 @@ filterColumns.DLData<-function(data,filter.fun){
 #'
 #' @examples
 #' # read data and create DLData object
-#' seqs<-read.table(system.file("extdata", "cjun.txt", package = "DepLogo"),stringsAsFactors = FALSE)
-#' data<-DLData(sequences = seqs[,1],weights = log(seqs[,2]+1) )
+#' seqs <- read.table(system.file("extdata", "cjun.txt", package = "DepLogo"), 
+#'     stringsAsFactors = FALSE)
+#' data <- DLData(sequences = seqs[, 1] ,weights = log1p(seqs[, 2]) )
 #' 
 #' suggestColors(data)
-suggestColors<-function(data){
-	UseMethod("suggestColors",data)
+suggestColors <- function(data){
+	UseMethod("suggestColors", data)
 }
 
-suggestColors.DLData<-function(data){
-	syms<-data$alphabet$chars
-	deps<-getDeps(data)
-	maxs<-apply(deps,1,max)
-	maxs<-maxs/sum(maxs)
-	freqs<-apply(data$data[,-ncol(data$data)],2,function(a){table(factor(a,levels=syms))})/nrow(data$data)
+suggestColors.DLData <- function(data){
+	syms <- data$alphabet$chars
+	deps <- getDeps(data)
+	maxs <- apply(deps, 1, max)
+	maxs <- maxs/sum(maxs)
+	freqs <- apply(data$data[, -ncol(data$data)], 2, function(a){table(factor(a, levels = syms))})/nrow(data$data)
 	
-	d<-matrix(NA,nrow=length(syms),ncol=length(syms))
-	rownames(d)<-colnames(d)<-syms
+	d <- matrix(NA, nrow = length(syms), ncol = length(syms))
+	rownames(d) <- colnames(d) <- syms
 	for(a in syms){
 		for(b in syms){
-			d[a,b]<-sum( apply(freqs[c(a,b),],2,prod)*maxs )
+			d[a, b] <- sum( apply(freqs[c(a, b), ], 2, prod) * maxs )
 		}
 	}
-	d<-matrix(rank(d),ncol=ncol(d))
-	rownames(d)<-colnames(d)<-syms
-	diag(d)<-0
+	d <- matrix(rank(d), ncol = ncol(d))
+	rownames(d) <- colnames(d) <- syms
+	diag(d) <- 0
 
-	scale<-cmdscale(d,k=1,add=TRUE)$points[,1]
-	names(scale)<-syms
-	ran<-rank(scale,ties.method = "min")
-	colors<-rainbow(max(ran))[ran]
+	scale <- cmdscale(d, k = 1, add = TRUE)$points[, 1]
+	names(scale) <- syms
+	ran <- rank(scale, ties.method = "min")
+	colors <- rainbow(max(ran))[ran]
 	if("-"%in%syms){
-		colors[syms=="-"]<-"black"
+		colors[syms=="-"] <- "black"
 	}
 	colors
 }
@@ -1280,20 +1378,21 @@ suggestColors.DLData<-function(data){
 #'
 #' @examples
 #' # read data and create DLData object
-#' seqs<-read.table(system.file("extdata", "cjun.txt", package = "DepLogo"),stringsAsFactors = FALSE)
-#' data<-DLData(sequences = seqs[,1],weights = log(seqs[,2]+1) )
+#' seqs <- read.table(system.file("extdata", "cjun.txt", package = "DepLogo"), 
+#'     stringsAsFactors = FALSE)
+#' data <- DLData(sequences = seqs[, 1], weights = log1p(seqs[, 2]) )
 #' 
-#' replaceColors(data,c("red","green","blue","yellow"))
-replaceColors<-function(data,colors){
-	UseMethod("replaceColors",data)
+#' replaceColors(data, c("red", "green", "blue", "yellow"))
+replaceColors <- function(data, colors){
+	UseMethod("replaceColors", data)
 }
 
 
-replaceColors.DLData<-function(data,colors){
+replaceColors.DLData <- function(data, colors){
 	if(length(colors) != length(data$alphabet$cols)){
-		stop("Number of colors does not match the number of symbols.");
+		stop("Number of colors does not match the number of symbols.")
 	}
-	data$alphabet$cols<-colors
+	data$alphabet$cols <- colors
 	data
 }
 
@@ -1309,28 +1408,28 @@ replaceColors.DLData<-function(data,colors){
 #' @author Jan Grau <grau@informatik.uni-halle.de>
 #'
 #' @examples
-#' data<-DLData(c("ACGT","ATTA"))
+#' data <- DLData(c("ACGT", "ATTA"))
 #' revcom(data)
 revcom<-function(data){
 	UseMethod("revcom",data)
 }
 
-revcom.DLData<-function(data){
+revcom.DLData <- function(data){
 	alphabets<-list(
-		dna=c("A"="T","C"="G","G"="C","T"="A"),
-		dnag=c("A"="T","C"="G","G"="C","T"="A","-"="-"),
-		rna=c("A"="U","C"="G","G"="C","U"="A"),
-		rnag=c("A"="U","C"="G","G"="C","U"="A","-"="-"))
+		dna = c("A" = "T", "C" = "G", "G" = "C", "T" = "A"),
+		dnag = c("A" = "T", "C" = "G", "G" = "C", "T" = "A", "-" = "-"),
+		rna = c("A" = "U", "C" = "G", "G" = "C", "U" = "A"),
+		rnag = c("A" = "U", "C" = "G", "G" = "C", "U" = "A", "-" = "-"))
 	
-	data.alph<-data$alphabet$chars
+	data.alph <- data$alphabet$chars
 	
-	sel<-sapply(1:length(alphabets),function(i){
-		ref<-names(alphabets[[i]])
+	sel <- sapply(1:length(alphabets), function(i){
+		ref <- names(alphabets[[i]])
 		if(length(data.alph)!=length(ref)){
 			FALSE
 		}else{
-			a<-sort(intersect(data.alph,ref))
-			b<-sort(union(data.alph,ref))
+			a <- sort(intersect(data.alph, ref))
+			b <- sort(union(data.alph, ref))
 			if(length(a)==length(b)){
 				sum(a!=b)==0
 			}else{
@@ -1339,15 +1438,15 @@ revcom.DLData<-function(data){
 		}
 	})
 	if(sum(sel)==0){
-		stop("Alphabet is not DNA or RNA");
+		stop("Alphabet is not DNA or RNA")
 	}
-	used<-alphabets[sel][[1]]
+	used <- alphabets[sel][[1]]
 	
-	df<-data$data[,-ncol(data$data)]
-	df2<-apply(df,2,function(a){used[as.character(a)]})
-	df2<-df2[,ncol(df2):1]
-	df2<-data.frame(df2,weights=data$data[,ncol(data$data)])
-	data$data<-df2
+	df <- data$data[, -ncol(data$data)]
+	df2 <- apply(df, 2, function(a){used[as.character(a)]})
+	df2 <- df2[, ncol(df2):1]
+	df2 <- data.frame(df2, weights=data$data[, ncol(data$data)])
+	data$data <- df2
 	
 	data
 }
