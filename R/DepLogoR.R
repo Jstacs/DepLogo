@@ -1183,6 +1183,68 @@ DLData<-function(sequences,
 
 
 
+summary.list <- function(object, delete.gaps = FALSE, ...){
+	if(length(object)>0 & class(object[[1]]) == "DLData"){
+		lapply(object, function(el){summary(el, delete.gaps = delete.gaps, ...)})
+	}else{
+		#summary.default(object, ...)
+		NextMethod("summary")
+	}
+}
+
+
+#' Summarizing DLData objects
+#' 
+#' \code{summary} method for class "DLData".
+#' The summary includes the number of sequences, the consensus sequence
+#' and the number of sequences in \code{object} that match the consensus.
+#'
+#' @param object an object of class "DLData"
+#' @param delete.gaps if deletes should be removed from the consensus
+#' @param ... further arguments passed to or from other methods
+#'
+#' @return a \code{list} with elements \code{members} containing the number of sequences,
+#'   \code{consensus} containing the consensus sequences, and \code{equal.consensus} containing the
+#'   number of sequences in \code{object} that are identical to \code{consensus}
+#' @export
+#' @author Jens Keilwagen, Jan Grau <grau@informatik.uni-halle.de>
+#'
+#' @examples
+#' seqs <- read.table(system.file("extdata", "cjun.txt", package = "DepLogo"), 
+#'     stringsAsFactors = FALSE)
+#' data <- DLData(sequences = seqs[, 1], weights = log1p(seqs[, 2]) )
+#' summary(data)
+summary.DLData <- function(object, delete.gaps = FALSE, ...){
+	m <- object$data
+	rn <- names(m)
+	m <- m[, rn!="weights"]
+	
+	consensus <- apply(m, 2, function(x){ 
+		tab <- table(x)
+		names(tab)[which.max(tab)]
+	} )
+	
+	num <- nrow(m);
+	
+	idx <- 1:num;
+	i <- 1;
+	r <- ncol(m);
+	while( length(idx)>0 && i <= r ) {
+		idx <- idx[ m[idx, i]==consensus[i] ]
+		i <- i+1;
+	}
+	
+	if( delete.gaps ) {
+		consensus <- consensus[ consensus != "-" ]
+	}             
+	seq <- paste(consensus, collapse="")
+	
+	return( list( members = num, consensus = seq, equals.consensus = length(idx) ) )
+}
+
+
+
+
 #' Filter columns (sequence positions) by gaps
 #'
 #' @param percent.gap the maximum fraction of gaps allowed to retain a column

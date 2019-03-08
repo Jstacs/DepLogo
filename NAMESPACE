@@ -1,5 +1,5 @@
 exportClasses(DLData,Alphabet);
-export(DLData,getDeps,getPWM,plotDeplogo,plotDepmatrix,plotDeparcs,colorchart,deprects,logo,subLines,subBoxes,Alphabet,plotBlocks,partition,filterColumns,suggestColors,replaceColors,revcom,filter.by.gaps,filter.by.conservation,filter.by.dependencies,alphabet.dna,alphabet.dna.gap,alphabet.rna,alphabet.rna.gap,alphabet.protein,alphabet.protein.gap);
+export(DLData,getDeps,getPWM,plotDeplogo,plotDepmatrix,plotDeparcs,colorchart,deprects,logo,subLines,subBoxes,Alphabet,plotBlocks,partition,filterColumns,suggestColors,replaceColors,revcom,filter.by.gaps,filter.by.conservation,filter.by.dependencies,alphabet.dna,alphabet.dna.gap,alphabet.rna,alphabet.rna.gap,alphabet.protein,alphabet.protein.gap,summary.DLData);
 S3method(getDeps,DLData);
 S3method(getDeps,data.frame);
 S3method(getPWM,DLData);
@@ -12,7 +12,9 @@ S3method(length,DLData);
 S3method(filterColumns,DLData);
 S3method(suggestColors,DLData);
 S3method(replaceColors,DLData);
-S3method(revcom,DLData)
+S3method(revcom,DLData);
+S3method(summary,DLData);
+S3method(summary,list);
 importFrom("grDevices", "boxplot.stats", "col2rgb", "gray", "rgb", "rainbow")
 importFrom("graphics", "abline", "axTicks", "axis", "image", "layout",
              "lines", "mtext", "par", "plot", "plot.new", "points",

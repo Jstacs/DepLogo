@@ -3,7 +3,7 @@ context("Partitioning")
 test_that("Partitioning",{
 	
 	seqs<-read.table(system.file("extdata", "cjun.txt", package = "DepLogo"),stringsAsFactors = FALSE)
-	data<-DLData(sequences = seqs[,1], weights = log( seqs[,2]+1 ) )
+	data<-DLData(sequences = seqs[,1], weights = log1p( seqs[,2] ) )
 	
 	parts<-partition(data,threshold = 0,minElements = 1000)
 	expect_equal(length(parts),5)

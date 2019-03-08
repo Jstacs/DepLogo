@@ -45,4 +45,23 @@ test_that("DLData alphabet, color",{
 	
 })
 
+test_that("DLData summary",{
+	seqs<-read.table(system.file("extdata", "cjun.txt", package = "DepLogo"),stringsAsFactors = FALSE)
+	data<-DLData(sequences = seqs[,1], weights = log1p( seqs[,2] ) )
+	li <- summary(data)
+	
+	expect_equal(li$members,nrow(data$data))
+	expect_equal(li$consensus,"GGGGGATGAGTCATCGGTGG")
+	expect_equal(li$equals.consensus,0)
+	
+	data$data <- data$data[,11:15]
+	li <- summary(data)
+	
+	expect_equal(li$members,nrow(data$data))
+	expect_equal(li$consensus,"TCATC")
+	expect_equal(li$equals.consensus,1971)
+	
+	
+})
+
 
