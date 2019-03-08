@@ -1200,7 +1200,7 @@ summary.list <- function(object, delete.gaps = FALSE, ...){
 #' and the number of sequences in \code{object} that match the consensus.
 #'
 #' @param object an object of class "DLData"
-#' @param delete.gaps if deletes should be removed from the consensus
+#' @param delete.gaps if gaps should be removed from the consensus
 #' @param ... further arguments passed to or from other methods
 #'
 #' @return a \code{list} with elements \code{members} containing the number of sequences,
