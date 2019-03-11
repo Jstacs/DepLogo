@@ -1184,10 +1184,13 @@ DLData<-function(sequences,
 
 
 summary.list <- function(object, delete.gaps = FALSE, ...){
-	if(length(object)>0 & class(object[[1]]) == "DLData"){
-		lapply(object, function(el){summary(el, delete.gaps = delete.gaps, ...)})
+	if(length(object)>0 & length(unique(sapply(object, class))) ==1 & class(object[[1]]) == "DLData"){
+		df<-c();
+		for(el in object){
+			df<-rbind(df,data.frame(summary(el, delete.gaps = delete.gaps, ...)))
+		}
+		df
 	}else{
-		#summary.default(object, ...)
 		NextMethod("summary")
 	}
 }
