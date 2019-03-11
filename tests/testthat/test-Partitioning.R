@@ -12,6 +12,12 @@ test_that("Partitioning",{
 		expect_gte(length(el),1000)
 	}
 	
+	df<-summary(parts)
+	
+	expect_equal(df$members,c(1682, 1245, 1860, 1901, 1920))
+	expect_equal(df$consensus,c("GGGGATGACGTCATCGGCGC", "GGGGGATGAGTCATCTGTTT", "GGGGGATGAGTCATCCATGG", "GGGGGATGAGTCATAGGGGG", "CAGGGATGAGTCATCAGTGC"))
+	expect_equal(df$equals.consensus,c(0,0,0,0,0))
+	
 	parts<-partition(data,threshold = 0,minElements = length(data))
 	expect_equal(length(parts),1)
 	

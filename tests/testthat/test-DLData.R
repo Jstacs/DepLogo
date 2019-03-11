@@ -61,6 +61,12 @@ test_that("DLData summary",{
 	expect_equal(li$consensus,"TCATC")
 	expect_equal(li$equals.consensus,1971)
 	
+	li <- partition(data)
+	df<-summary(li)
+	
+	expect_equal(df$members,nrow(data$data))
+	expect_equal(df$consensus,"TCATC")
+	expect_equal(df$equals.consensus,1971)
 	
 })
 
