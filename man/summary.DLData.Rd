@@ -9,7 +9,7 @@
 \arguments{
 \item{object}{an object of class "DLData"}
 
-\item{delete.gaps}{if deletes should be removed from the consensus}
+\item{delete.gaps}{if gaps should be removed from the consensus}
 
 \item{...}{further arguments passed to or from other methods}
 }
