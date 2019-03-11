@@ -138,6 +138,7 @@ Before plotting dependency logos, we need to construct a *DLData* object from ou
 ```{r}
 data <- DLData(sequences = seqs[, 1],weights = log1p(seqs[, 2]) )
 ```
+The implementation of *summary* for *DLData* objects returns a list containing the number of sequences, the consensus of all sequences, and the number of sequences that are identical to the consensus sequence.
 
 We then use the resulting *DLData* object to plot a first dependency logo:
 
@@ -351,6 +352,7 @@ data <- DLData(sequences = seqs[, 1], weights = log1p( seqs[, 2] ) )
 
 partitions <- partition(data, threshold = 0.3, minElements = 100)
 ```
+Calling *summary* on this list of partitions returns a *data.frame* with columns for the total number of sequence, the consensus sequence, and the number of sequences that are identical to the consensus sequence, and with one row per partition.
 
 The resulting partitioning may then be visualized by the default method of dependency logos, by color charts, or by separate sequence logos:
 ```{r}
