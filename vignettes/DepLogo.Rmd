@@ -43,6 +43,8 @@ The DepLogo R-package extends the original dependency logos [@keilwagen15varying
 - extension to almost arbitrary alphabets, including RNA and protein alphabet, and gaps, and
 - visualization of numeric values ("weights") associated with the individual sequences, e.g., prediction scores, peak statistics, binding affinities, etc.
 
+The source code of the DepLogo R-package is available from https://github.com/Jstacs/DepLogo.
+
 ## General concepts of dependency logos
 
 The general, conceptual idea of dependency logos is to show dependencies in (aligned) sequences by position-wise partitioning of input sequences. Each of the resulting partitions is then visualized separately. In case of inter-dependent positions, the symbols occurring at one position should be related to those symbols occurring at mutually dependent positions. Hence, a partitioning by symbols at the first position should also lead to a (partial) separation of symbols at those positions depending on the first position. Partitioning and subsequent visualization will make such dependencies perceptible. Each resulting partition may be sub-divided into further sub-groups recursively.
