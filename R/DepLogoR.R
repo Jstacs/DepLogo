@@ -806,7 +806,7 @@ plotBlocks.list <- function(data, show.number = TRUE, block.fun = deprects, ic.s
 #' The functions \code{block.fun} and \code{summary.fun} provided for plotting
 #' the representation of individual partitions of the data generated in
 #' dependency logos are currently implemented in \link{deprects},
-#' \link{colorchart}, and \code{logo}. Custom implementations must have the same
+#' \link{colorchart}, and \link{logo}. Custom implementations must have the same
 #' signature as these functions and create a single plot without using
 #' \link[graphics]{layout} (or similar).
 #' 
@@ -1391,6 +1391,7 @@ filterColumns.DLData<-function(data, filter.fun){
 #' @return the colors
 #' @export
 #' @author Jan Grau <grau@informatik.uni-halle.de>
+#' @seealso \link{replaceColors}
 #'
 #' @examples
 #' # read data and create DLData object
@@ -1440,6 +1441,7 @@ suggestColors.DLData <- function(data){
 #' @return the modified \link{DLData} object
 #' @export
 #' @author Jan Grau <grau@informatik.uni-halle.de>
+#' @seealso \link{replaceColors}
 #'
 #' @examples
 #' # read data and create DLData object

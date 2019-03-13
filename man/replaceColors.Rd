@@ -25,6 +25,9 @@ data <- DLData(sequences = seqs[, 1], weights = log1p(seqs[, 2]) )
 
 replaceColors(data, c("red", "green", "blue", "yellow"))
 }
+\seealso{
+\link{replaceColors}
+}
 \author{
 Jan Grau <grau@informatik.uni-halle.de>
 }

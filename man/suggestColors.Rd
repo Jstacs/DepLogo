@@ -27,6 +27,9 @@ data <- DLData(sequences = seqs[, 1] ,weights = log1p(seqs[, 2]) )
 
 suggestColors(data)
 }
+\seealso{
+\link{replaceColors}
+}
 \author{
 Jan Grau <grau@informatik.uni-halle.de>
 }
