@@ -2,7 +2,7 @@
 % Please edit documentation in R/DepLogoR.R
 \name{plotDepmatrix}
 \alias{plotDepmatrix}
-\title{Plot a matrix representation of dependency values.}
+\title{Plots a matrix representation of dependency values}
 \usage{
 plotDepmatrix(data, axis.at.bottom = TRUE, add.legend = TRUE,
   show.pvals = FALSE, axis.labels = NULL, threshold = 0.1)

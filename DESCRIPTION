@@ -7,7 +7,7 @@ Authors@R: c(person("Jan", "Grau", email = "grau@informatik.uni-halle.de", role 
 	person("Martin", "Nettling",role = c("aut"))
   )
 Maintainer: Jan Grau <grau@informatik.uni-halle.de>
-Description: Plots dependency logos from a set of input sequences.
+Description: Plots dependency logos from a set of aligned input sequences.
 License: GPL-3
 NeedsCompilation: no
 RoxygenNote: 6.0.1

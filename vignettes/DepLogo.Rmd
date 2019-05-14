@@ -140,6 +140,9 @@ Before plotting dependency logos, we need to construct a *DLData* object from ou
 ```{r}
 data <- DLData(sequences = seqs[, 1],weights = log1p(seqs[, 2]) )
 ```
+
+In general, *DLData* objects may be generated from *character* vectors of any origin. Instead of loading these directly from a file, we may, for instance, also convert a *DNAStringSet*/*XStringSet* object to a *character* vector using its *as.character* method.
+
 The implementation of *summary* for *DLData* objects returns a list containing the number of sequences, the consensus of all sequences, and the number of sequences that are identical to the consensus sequence.
 
 We then use the resulting *DLData* object to plot a first dependency logo:
