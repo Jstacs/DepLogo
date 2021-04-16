@@ -1,7 +1,7 @@
 Package: DepLogo
 Type: Package
 Title: Dependency Logo
-Version: 1.0
+Version: 1.2
 Authors@R: c(person("Jan", "Grau", email = "grau@informatik.uni-halle.de", role = c("aut", "cre")),
 	person("Jens", "Keilwagen", role = c("aut")),
 	person("Martin", "Nettling",role = c("aut"))
@@ -12,4 +12,4 @@ License: GPL-3
 NeedsCompilation: no
 RoxygenNote: 6.0.1
 VignetteBuilder: knitr
-Suggests: knitr, testthat
+Suggests: knitr, rmarkdown, testthat
