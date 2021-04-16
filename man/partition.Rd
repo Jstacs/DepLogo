@@ -4,8 +4,15 @@
 \alias{partition}
 \title{Paritions data by most inter-dependent positions}
 \usage{
-partition(data, minElements = 10, threshold = 0.1, numBestForSorting = 3,
-  maxNum = 6, sortByWeights = NULL, partition.by = NULL)
+partition(
+  data,
+  minElements = 10,
+  threshold = 0.1,
+  numBestForSorting = 3,
+  maxNum = 6,
+  sortByWeights = NULL,
+  partition.by = NULL
+)
 }
 \arguments{
 \item{data}{the data as \link{DLData} object}

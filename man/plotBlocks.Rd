@@ -4,8 +4,14 @@
 \alias{plotBlocks}
 \title{Plots blocks of data}
 \usage{
-plotBlocks(data, show.number = TRUE, block.fun = deprects,
-  ic.scale = TRUE, add = FALSE, ...)
+plotBlocks(
+  data,
+  show.number = TRUE,
+  block.fun = deprects,
+  ic.scale = TRUE,
+  add = FALSE,
+  ...
+)
 }
 \arguments{
 \item{data}{the data, a single \link{DLData} object or a list of \code{DLData} objects}

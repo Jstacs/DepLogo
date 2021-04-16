@@ -4,8 +4,14 @@
 \alias{plotDepmatrix}
 \title{Plots a matrix representation of dependency values}
 \usage{
-plotDepmatrix(data, axis.at.bottom = TRUE, add.legend = TRUE,
-  show.pvals = FALSE, axis.labels = NULL, threshold = 0.1)
+plotDepmatrix(
+  data,
+  axis.at.bottom = TRUE,
+  add.legend = TRUE,
+  show.pvals = FALSE,
+  axis.labels = NULL,
+  threshold = 0.1
+)
 }
 \arguments{
 \item{data}{the \link{DLData} object containing the data}

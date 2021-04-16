@@ -4,9 +4,15 @@
 \alias{DLData}
 \title{Create \code{DLData} object}
 \usage{
-DLData(sequences, weights = NULL, symbols = alphabet.dna$alphabet,
-  colors = alphabet.dna$colors, delim = "",
-  sortByWeights = !is.null(weights), axis.labels = NULL)
+DLData(
+  sequences,
+  weights = NULL,
+  symbols = alphabet.dna$alphabet,
+  colors = alphabet.dna$colors,
+  delim = "",
+  sortByWeights = !is.null(weights),
+  axis.labels = NULL
+)
 }
 \arguments{
 \item{sequences}{the input sequences, may be provided as i) \code{character}

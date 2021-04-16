@@ -4,13 +4,27 @@
 \alias{plotDeplogo}
 \title{Plot a dependency logo}
 \usage{
-plotDeplogo(data, dep.fun = plotDeparcs, block.fun = deprects,
-  summary.fun = logo, weight.fun = NULL, chunks = NULL,
-  chunk.height = 800, summary.height = 100, minPercent = 0.03,
-  threshold = 0.1, numBestForSorting = 3, maxNum = 6,
-  sortByWeights = NULL, dep.fun.legend = TRUE,
-  show.dependency.pvals = FALSE, axis.labels = NULL, weight.ratio = 5,
-  partition.by = NULL, ...)
+plotDeplogo(
+  data,
+  dep.fun = plotDeparcs,
+  block.fun = deprects,
+  summary.fun = logo,
+  weight.fun = NULL,
+  chunks = NULL,
+  chunk.height = 800,
+  summary.height = 100,
+  minPercent = 0.03,
+  threshold = 0.1,
+  numBestForSorting = 3,
+  maxNum = 6,
+  sortByWeights = NULL,
+  dep.fun.legend = TRUE,
+  show.dependency.pvals = FALSE,
+  axis.labels = NULL,
+  weight.ratio = 5,
+  partition.by = NULL,
+  ...
+)
 }
 \arguments{
 \item{data}{the data, currently implemented for \link{DLData} objects}
