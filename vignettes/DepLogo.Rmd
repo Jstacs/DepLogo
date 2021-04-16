@@ -2,8 +2,8 @@
 title: "DepLogo -- plotting dependency logos of sequence data"
 author: "Jan Grau, Martin Nettling, and Jens Keilwagen"
 date: "`r Sys.Date()`"
+bibliography: references.bibtex
 output: rmarkdown::html_document
-bibliography: references.bib
 rmarkdown::html_document:
         fig_caption: yes
 vignette: >
