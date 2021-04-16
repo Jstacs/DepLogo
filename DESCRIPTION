@@ -10,6 +10,6 @@ Maintainer: Jan Grau <grau@informatik.uni-halle.de>
 Description: Plots dependency logos from a set of aligned input sequences.
 License: GPL-3
 NeedsCompilation: no
-RoxygenNote: 6.0.1
+RoxygenNote: 7.1.0
 VignetteBuilder: knitr
 Suggests: knitr, rmarkdown, testthat
