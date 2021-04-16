@@ -9,7 +9,8 @@ plotDeplogo(data, dep.fun = plotDeparcs, block.fun = deprects,
   chunk.height = 800, summary.height = 100, minPercent = 0.03,
   threshold = 0.1, numBestForSorting = 3, maxNum = 6,
   sortByWeights = NULL, dep.fun.legend = TRUE,
-  show.dependency.pvals = FALSE, axis.labels = NULL, ...)
+  show.dependency.pvals = FALSE, axis.labels = NULL, weight.ratio = 5,
+  partition.by = NULL, ...)
 }
 \arguments{
 \item{data}{the data, currently implemented for \link{DLData} objects}
@@ -57,6 +58,10 @@ dependency values in \code{dep.fun} instead of mutual information values}
 
 \item{axis.labels}{labels for the x-axis, vector of the same length as the
 individual sequences}
+
+\item{weight.ratio}{the factor by which the plotting width for the main plot is larger than for \code{weight.fun}}
+
+\item{partition.by}{specify fixed positions to partition by}
 
 \item{...}{forwarded to the high-level \code{plot} that contains the blocks
 plotted by \code{block.fun}}

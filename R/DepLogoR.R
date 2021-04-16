@@ -74,6 +74,7 @@ getICScale <- function(column){
 #'   weight value, if \code{false} by frequency of symbols at the partitioning
 #'   position otherwise. If \code{NULL}, the \code{$sortByWeights} value of the
 #'   \link{DLData} object is used
+#' @param partition.by specify fixed positions to partition by
 #'   
 #' @return the partitions as list of \link{DLData} objects
 #' @export
@@ -98,7 +99,8 @@ partition <- function(
 	threshold = 0.1,
 	numBestForSorting = 3,
 	maxNum = 6,
-	sortByWeights = NULL){
+	sortByWeights = NULL,
+	partition.by = NULL){
 	UseMethod("partition", data)
 }
 
@@ -108,20 +110,30 @@ partition.DLData<-function(
 	threshold = 0.1,
 	numBestForSorting = 3,
 	maxNum = 6,
-	sortByWeights = NULL){
+	sortByWeights = NULL,
+	partition.by = NULL){
 	if( is.null(sortByWeights)){
 		sortByWeights <- data$sortByWeights;
 	}
 
-	temp <- partitionRecursive(data = data$data,
-							   minElements = minElements,
-							   threshold = threshold,
-							   numBestForSorting = numBestForSorting,
-							   maxNum = maxNum,
-							   sortByWeights = sortByWeights,
-							   alphabet = data$alphabet$chars,
-							   exclude = rep(FALSE, ncol(data$data) - 1))
-	
+	if(is.null(partition.by)){
+		temp <- partitionRecursive(data = data$data,
+								   minElements = minElements,
+								   threshold = threshold,
+								   numBestForSorting = numBestForSorting,
+								   maxNum = maxNum,
+								   sortByWeights = sortByWeights,
+								   alphabet = data$alphabet$chars,
+								   exclude = rep(FALSE, ncol(data$data) - 1))
+	}else{
+		temp <- split(x=data$data, f=data$data[, partition.by], drop=TRUE)
+		temp <- joinSmall(partSort = temp, minElements = minElements, sortByWeights = FALSE)
+		if(sortByWeights){
+			ws <- sapply(temp,function(a){mean(a$weights)})
+			o <- order(ws, decreasing = TRUE)
+			temp <- temp[ o ]
+		}
+	}
 	lapply(temp, function(a){
 		li <- list(data = a, alphabet = data$alphabet, sortByWeights = sortByWeights, axis.labels = data$axis.labels)
 		class(li) <- "DLData"
@@ -847,6 +859,8 @@ plotBlocks.list <- function(data, show.number = TRUE, block.fun = deprects, ic.s
 #'   dependency values in \code{dep.fun} instead of mutual information values
 #' @param axis.labels labels for the x-axis, vector of the same length as the
 #'   individual sequences
+#' @param weight.ratio the factor by which the plotting width for the main plot is larger than for \code{weight.fun}
+#' @param partition.by specify fixed positions to partition by
 #' @param ... forwarded to the high-level \code{plot} that contains the blocks
 #'   plotted by \code{block.fun}
 #'   
@@ -888,6 +902,8 @@ plotDeplogo<-function(data,
 					  dep.fun.legend = TRUE,
 					  show.dependency.pvals = FALSE,
 					  axis.labels = NULL,
+					  weight.ratio = 5,
+					  partition.by = NULL,
 					  ...){
 	UseMethod("plotDeplogo", data)
 }
@@ -907,7 +923,10 @@ plotDeplogo.DLData<-function(data,
 							sortByWeights = NULL,
 							dep.fun.legend = TRUE,
 							show.dependency.pvals = FALSE,
-							axis.labels = NULL, ...){
+							axis.labels = NULL, 
+							weight.ratio = 5,
+							partition.by = NULL,
+							...){
 	
 	if(is.null(chunks)){
 		chunks <- nrow(data$data)
@@ -948,7 +967,7 @@ plotDeplogo.DLData<-function(data,
 	par(mar = c(2, 2.5, 0, ifelse(!is.null(weight.fun), 0, 1)))
 	
 	if(!is.null(weight.fun)){
-		layout(mat = matrix(1:(2 * numPlots), ncol=2), widths = c(ncol(data$data) - 1, (ncol(data$data) - 1)/5), heights = height)
+		layout(mat = matrix(1:(2 * numPlots), ncol=2), widths = c(ncol(data$data) - 1, (ncol(data$data) - 1)/weight.ratio), heights = height)
 	}else{
 		layout(mat = matrix(1:numPlots, ncol = 1), widths = c(1), heights = height)
 	}
@@ -959,7 +978,7 @@ plotDeplogo.DLData<-function(data,
 	w.li <- list()
 	sapply(1:length(parts), function(i){
 		sub.parts <- partition.DLData(data = parts[[i]], minElements = nrow(parts[[i]]$data) * minPercent,
-							 threshold = threshold, numBestForSorting = numBestForSorting, maxNum = maxNum)
+							 threshold = threshold, numBestForSorting = numBestForSorting, maxNum = maxNum, partition.by = partition.by)
 
 		plotBlocks(data = sub.parts, show.number = TRUE, block.fun = block.fun, ic.scale = TRUE, add = FALSE, ...)
 		plotBlocks(data = parts[[i]], show.number = FALSE, block.fun = summary.fun, ic.scale = TRUE, add = FALSE, ... )
