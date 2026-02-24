@@ -26,5 +26,5 @@ test_that("Partitioning",{
 	
 	parts<-partition(data)
 	num<-apply(parts[[1]]$data,2,function(a){length(unique(a))})
-	expect(min(num),1)
+	expect_equal(min(num),1)
 })
